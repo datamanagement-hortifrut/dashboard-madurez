@@ -79,7 +79,11 @@ export default function RadarChart({
   })
   const polygonStr = polygon.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
 
-  const validScores = dims.map(d => d.score).filter(Boolean)
+  // Si hay pilar seleccionado, el score central es el promedio de ese pilar
+  const activeDims  = selectedPilar
+    ? dims.filter(d => d.pilar === selectedPilar)
+    : dims
+  const validScores = activeDims.map(d => d.score).filter(Boolean)
   const globalScore = validScores.length
     ? (validScores.reduce((a, b) => a + b, 0) / validScores.length).toFixed(2)
     : null
@@ -260,7 +264,8 @@ export default function RadarChart({
             <text x={cx} y={cy + 1}
               textAnchor="middle" dominantBaseline="middle"
               fontSize="18" fontWeight="800"
-              fontFamily="DM Mono, monospace" fill="#1a5c2a">
+              fontFamily="DM Mono, monospace"
+              fill={selectedPilar ? (PILLAR_COLORS[selectedPilar] || '#1a5c2a') : '#1a5c2a'}>
               {globalScore}
             </text>
           </g>
