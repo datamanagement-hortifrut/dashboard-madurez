@@ -106,7 +106,8 @@ function GroupProgress({ group, data, lang }) {
 
 // ── Vista: Overview ─────────────────────────────────────────
 function OverviewView({ scores, rows, questions, lang }) {
-  const [selectedDim, setSelectedDim] = React.useState(null)
+  const [selectedDim,   setSelectedDim]   = React.useState(null)
+  const [selectedPilar, setSelectedPilar] = React.useState(null)
   if (!scores) return (
     <div className="loading-center">
       <div style={{ fontSize: '2rem' }}>📊</div>
@@ -157,7 +158,9 @@ function OverviewView({ scores, rows, questions, lang }) {
             {lang === 'en' ? 'Company Level' : 'Nivel Compañía'}
           </div>
           <div className="radar-wrap">
-            <RadarChart dimensions={scores.dimensions} size={440} lang={lang} />
+            <RadarChart dimensions={scores.dimensions} size={440} lang={lang}
+              selectedDim={selectedDim}     onSelectDim={setSelectedDim}
+              selectedPilar={selectedPilar} onSelectPilar={(p) => { setSelectedPilar(p); setSelectedDim(null) }} />
           </div>
         </div>
 
@@ -290,7 +293,8 @@ function FilteredView({ rows, questions, employees, lang }) {
     ? `${lang === 'en' ? 'Score for' : 'Score para'} ${selPais}`
     : lang === 'en' ? 'All Countries' : 'Todos los países'
 
-  const [selectedDim, setSelectedDim] = React.useState(null)
+  const [selectedDim,   setSelectedDim]   = React.useState(null)
+  const [selectedPilar, setSelectedPilar] = React.useState(null)
   return (
     <div>
       <div className="filter-bar">
@@ -321,7 +325,9 @@ function FilteredView({ rows, questions, employees, lang }) {
               </div>
             </div>
             <div className="radar-wrap">
-              <RadarChart dimensions={scores.dimensions} size={420} lang={lang} />
+              <RadarChart dimensions={scores.dimensions} size={420} lang={lang}
+              selectedDim={selectedDim}     onSelectDim={setSelectedDim}
+              selectedPilar={selectedPilar} onSelectPilar={(p) => { setSelectedPilar(p); setSelectedDim(null) }} />
             </div>
           </div>
           <div className="card card-pad">
@@ -389,7 +395,9 @@ function GroupsView({ rows, questions, employees, lang }) {
               </div>
             </div>
             <div className="radar-wrap">
-              <RadarChart dimensions={scores.dimensions} size={420} lang={lang} />
+              <RadarChart dimensions={scores.dimensions} size={420} lang={lang}
+            selectedDim={selectedDim}     onSelectDim={setSelectedDim}
+            selectedPilar={selectedPilar} onSelectPilar={(p) => { setSelectedPilar(p); setSelectedDim(null) }} />
             </div>
           </div>
           <div className="card card-pad">
@@ -411,7 +419,8 @@ function GroupsView({ rows, questions, employees, lang }) {
 // ── ROOT APP ────────────────────────────────────────────────
 export default function App() {
   const [view,    setView]    = useState('overview')
-  const [radarSelectedDim, setRadarSelectedDim] = useState(null)
+  const [radarSelectedDim,   setRadarSelectedDim]   = useState(null)
+  const [radarSelectedPilar, setRadarSelectedPilar] = useState(null)
   const [lang,    setLang]    = useState(() => navigator.language?.startsWith('en') ? 'en' : 'es')
   const [rows,    setRows]    = useState([])
   const [loading, setLoading] = useState(true)
@@ -540,7 +549,8 @@ export default function App() {
                   {scores
                     ? <>
                         <RadarChart dimensions={scores.dimensions} size={580} lang={lang}
-                          selectedDim={radarSelectedDim} onSelectDim={setRadarSelectedDim} />
+                          selectedDim={radarSelectedDim}     onSelectDim={setRadarSelectedDim}
+                          selectedPilar={radarSelectedPilar} onSelectPilar={(p) => { setRadarSelectedPilar(p); setRadarSelectedDim(null) }} />
                         <DimensionDetail dimName={radarSelectedDim} rows={rows} questions={questions}
                           lang={lang} onClose={() => setRadarSelectedDim(null)} />
                       </>

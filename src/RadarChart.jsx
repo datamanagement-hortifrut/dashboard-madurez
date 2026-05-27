@@ -43,10 +43,12 @@ function splitLabel(label, maxChars = 17) {
 
 export default function RadarChart({
   dimensions,
-  size        = 500,
-  lang        = 'es',
-  selectedDim = null,       // nombre de dimensión seleccionada
-  onSelectDim = () => {},   // callback al hacer clic
+  size          = 500,
+  lang          = 'es',
+  selectedDim   = null,       // dimensión seleccionada (clic en etiqueta)
+  onSelectDim   = () => {},
+  selectedPilar = null,       // pilar seleccionado (clic en leyenda)
+  onSelectPilar = () => {},
 }) {
   const MARGIN   = 115
   const totalW   = size + MARGIN * 2
@@ -83,6 +85,7 @@ export default function RadarChart({
     : null
 
   const hasSelection = !!selectedDim
+  const hasPilarFilter = !!selectedPilar
 
   return (
     <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
@@ -113,23 +116,24 @@ export default function RadarChart({
         {/* Ejes */}
         {dims.map((d, i) => {
           const outer = polarToCartesian(cx, cy, maxR, d.angle)
-          const isSelected = d.name === selectedDim
+          const isSelAxis  = d.name === selectedDim
+          const isActiveAxis = !selectedPilar || d.pilar === selectedPilar
           return (
             <line key={i}
               x1={cx} y1={cy}
               x2={outer.x.toFixed(1)} y2={outer.y.toFixed(1)}
-              stroke={isSelected ? PILLAR_COLORS[d.pilar] || DEFAULT_COLOR : '#e5e7eb'}
-              strokeWidth={isSelected ? 1.5 : 1}
-              opacity={hasSelection && !isSelected ? 0.3 : 1}
+              stroke={isSelAxis ? PILLAR_COLORS[d.pilar] || DEFAULT_COLOR : isActiveAxis && selectedPilar ? PILLAR_COLORS[d.pilar] || DEFAULT_COLOR : '#e5e7eb'}
+              strokeWidth={isSelAxis || (isActiveAxis && selectedPilar) ? 1.5 : 1}
+              opacity={(hasSelection && !isSelAxis) || (selectedPilar && !isActiveAxis) ? 0.15 : 1}
             />
           )
         })}
 
-        {/* Polígono base (atenuado si hay selección) */}
+        {/* Polígono base */}
         <polygon
           points={polygonStr}
-          fill={hasSelection ? 'rgba(0,192,75,0.04)' : 'rgba(0,192,75,0.09)'}
-          stroke={hasSelection ? 'rgba(0,192,75,0.2)' : 'rgba(0,192,75,0.55)'}
+          fill={(hasSelection || hasPilarFilter) ? 'rgba(0,192,75,0.04)' : 'rgba(0,192,75,0.09)'}
+          stroke={(hasSelection || hasPilarFilter) ? 'rgba(0,192,75,0.2)' : 'rgba(0,192,75,0.55)'}
           strokeWidth="1.8"
         />
 
@@ -163,9 +167,10 @@ export default function RadarChart({
           const labelPt   = polarToCartesian(cx, cy, labelR, d.angle)
           const color     = PILLAR_COLORS[d.pilar] || DEFAULT_COLOR
           const angleN    = ((d.angle % 360) + 360) % 360
-          const isSelected = d.name === selectedDim
-          const dimmed    = hasSelection && !isSelected
-          const opacity   = dimmed ? 0.25 : 1
+          const isSelected    = d.name === selectedDim
+          const isPilarActive = !selectedPilar || d.pilar === selectedPilar
+          const dimmed        = (hasSelection && !isSelected) || (!hasSelection && !isPilarActive && !!selectedPilar)
+          const opacity       = dimmed ? 0.18 : 1
 
           let textAnchor = 'middle'
           if      (angleN > 15  && angleN < 165) textAnchor = 'start'
@@ -262,21 +267,42 @@ export default function RadarChart({
         )}
       </svg>
 
-      {/* Leyenda */}
-      <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', justifyContent:'center', marginTop:10 }}>
-        {Object.entries(PILLAR_COLORS).map(([pilar, color]) => (
-          <div key={pilar} style={{ display:'flex', alignItems:'center', gap:5, fontSize:'.72rem', color:'#6b7280' }}>
-            <div style={{ width:9, height:9, borderRadius:'50%', background:color, flexShrink:0 }} />
-            {lang === 'en' ? PILLAR_EN[pilar] : pilar}
-          </div>
-        ))}
+      {/* Leyenda — clicable por pilar */}
+      <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center', marginTop:12 }}>
+        {Object.entries(PILLAR_COLORS).map(([pilar, color]) => {
+          const isActive  = !selectedPilar || selectedPilar === pilar
+          const isSelected = selectedPilar === pilar
+          return (
+            <div key={pilar}
+              onClick={() => onSelectPilar(isSelected ? null : pilar)}
+              style={{
+                display:'flex', alignItems:'center', gap:6,
+                fontSize:'.72rem', cursor:'pointer',
+                padding:'4px 10px', borderRadius:20,
+                border: `1.5px solid ${isSelected ? color : isActive ? '#e5e7eb' : '#f3f4f6'}`,
+                background: isSelected ? color + '15' : 'transparent',
+                color: isSelected ? color : isActive ? '#4b5563' : '#d1d5db',
+                fontWeight: isSelected ? 700 : 400,
+                transition: 'all .15s',
+                userSelect: 'none',
+              }}
+            >
+              <div style={{
+                width:8, height:8, borderRadius:'50%',
+                background: isActive ? color : '#d1d5db',
+                flexShrink:0, transition:'background .15s',
+              }} />
+              {lang === 'en' ? PILLAR_EN[pilar] : pilar}
+            </div>
+          )
+        })}
       </div>
 
-      {/* Hint clic */}
+      {/* Hint */}
       <div style={{ textAlign:'center', fontSize:'.68rem', color:'#9ca3af', marginTop:6 }}>
         {lang === 'en'
-          ? '↑ Click a dimension to see the detail'
-          : '↑ Haz clic en una dimensión para ver el detalle'}
+          ? '↑ Click a dimension or pillar to filter'
+          : '↑ Haz clic en una dimensión o pilar para filtrar'}
       </div>
     </div>
   )
