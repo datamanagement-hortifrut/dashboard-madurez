@@ -1,6 +1,7 @@
 /**
- * RadarChart.jsx — Gráfico radar SVG puro, sin dependencias externas.
- * Replica el estilo del gráfico de ejemplo.
+ * RadarChart.jsx — Gráfico radar interactivo.
+ * - Clic en etiqueta/punto → selecciona dimensión y dispara onSelectDim
+ * - Dimensión seleccionada se resalta, las demás se atenúan
  */
 import { useMemo } from 'react'
 
@@ -11,18 +12,50 @@ const PILLAR_COLORS = {
   'Estrategia del Dato':          '#dc2626',
 }
 const DEFAULT_COLOR = '#6b8c74'
+const PILLAR_EN = {
+  'Gestión y Gobierno del Dato': 'Data Management & Governance',
+  'Consumo de Información':      'Information Consumption',
+  'Analítica Avanzada':          'Advanced Analytics',
+  'Estrategia del Dato':         'Data Strategy',
+}
 
 function polarToCartesian(cx, cy, r, angleDeg) {
   const rad = ((angleDeg - 90) * Math.PI) / 180
   return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
 }
 
-export default function RadarChart({ dimensions, size = 520, lang = 'es' }) {
-  const cx = size / 2
-  const cy = size / 2
-  const maxR = size * 0.36
-  const labelR = size * 0.48
-  const levels = [1, 2, 3, 4, 5]
+function splitLabel(label, maxChars = 17) {
+  if (label.length <= maxChars) return [label]
+  const words = label.split(' ')
+  const lines = []
+  let current = ''
+  for (const word of words) {
+    if ((current + ' ' + word).trim().length <= maxChars) {
+      current = (current + ' ' + word).trim()
+    } else {
+      if (current) lines.push(current)
+      current = word
+    }
+  }
+  if (current) lines.push(current)
+  return lines
+}
+
+export default function RadarChart({
+  dimensions,
+  size        = 500,
+  lang        = 'es',
+  selectedDim = null,       // nombre de dimensión seleccionada
+  onSelectDim = () => {},   // callback al hacer clic
+}) {
+  const MARGIN   = 115
+  const totalW   = size + MARGIN * 2
+  const totalH   = size + MARGIN * 2
+  const cx       = totalW / 2
+  const cy       = totalH / 2
+  const maxR     = size * 0.42
+  const labelR   = maxR + 54
+  const levels   = [1, 2, 3, 4, 5]
   const maxScore = 5
 
   const dims = useMemo(() => {
@@ -30,52 +63,48 @@ export default function RadarChart({ dimensions, size = 520, lang = 'es' }) {
     return entries.map(([name, v], i) => ({
       name,
       nameEn: v.label_en || name,
-      score: v.score,
-      pilar: v.pilar,
-      angle: (360 / entries.length) * i,
+      score:  v.score,
+      pilar:  v.pilar,
+      angle:  (360 / entries.length) * i,
     }))
   }, [dimensions])
 
-  const n = dims.length
-  if (n < 3) return null
+  if (dims.length < 3) return null
 
-  // Polígono de datos
   const polygon = dims.map(d => {
     const r = (d.score / maxScore) * maxR
     return polarToCartesian(cx, cy, r, d.angle)
   })
   const polygonStr = polygon.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
 
-  // Calcular score global
-  const validScores = dims.map(d => d.score).filter(s => s !== null)
+  const validScores = dims.map(d => d.score).filter(Boolean)
   const globalScore = validScores.length
     ? (validScores.reduce((a, b) => a + b, 0) / validScores.length).toFixed(2)
     : null
 
+  const hasSelection = !!selectedDim
+
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
       <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
+        width={totalW} height={totalH}
+        viewBox={`0 0 ${totalW} ${totalH}`}
         style={{ maxWidth: '100%', height: 'auto' }}
       >
         {/* Círculos de fondo */}
         {levels.map(l => (
-          <circle
-            key={l}
-            cx={cx} cy={cy}
+          <circle key={l} cx={cx} cy={cy}
             r={(l / maxScore) * maxR}
             fill="none"
-            stroke="#d1d5db"
-            strokeWidth={l === 5 ? 1.5 : 0.8}
-            strokeDasharray={l < 5 ? '3 3' : 'none'}
+            stroke={l === 5 ? '#9ca3af' : '#e5e7eb'}
+            strokeWidth={l === 5 ? 1.2 : 0.8}
+            strokeDasharray={l < 5 ? '4 4' : 'none'}
           />
         ))}
 
         {/* Etiquetas de niveles */}
         {levels.map(l => (
-          <text key={l} x={cx + 4} y={cy - (l / maxScore) * maxR + 4}
+          <text key={l} x={cx + 5} y={cy - (l / maxScore) * maxR + 4}
             fontSize="9" fill="#9ca3af" fontFamily="DM Mono, monospace">
             {l}
           </text>
@@ -84,120 +113,170 @@ export default function RadarChart({ dimensions, size = 520, lang = 'es' }) {
         {/* Ejes */}
         {dims.map((d, i) => {
           const outer = polarToCartesian(cx, cy, maxR, d.angle)
+          const isSelected = d.name === selectedDim
           return (
             <line key={i}
               x1={cx} y1={cy}
               x2={outer.x.toFixed(1)} y2={outer.y.toFixed(1)}
-              stroke="#e5e7eb" strokeWidth="1"
+              stroke={isSelected ? PILLAR_COLORS[d.pilar] || DEFAULT_COLOR : '#e5e7eb'}
+              strokeWidth={isSelected ? 1.5 : 1}
+              opacity={hasSelection && !isSelected ? 0.3 : 1}
             />
           )
         })}
 
-        {/* Polígono relleno */}
+        {/* Polígono base (atenuado si hay selección) */}
         <polygon
           points={polygonStr}
-          fill="rgba(0,192,75,0.08)"
-          stroke="rgba(0,192,75,0.5)"
-          strokeWidth="1.5"
+          fill={hasSelection ? 'rgba(0,192,75,0.04)' : 'rgba(0,192,75,0.09)'}
+          stroke={hasSelection ? 'rgba(0,192,75,0.2)' : 'rgba(0,192,75,0.55)'}
+          strokeWidth="1.8"
         />
 
-        {/* Puntos y etiquetas */}
+        {/* Si hay selección, dibujar solo el área de esa dimensión resaltada */}
+        {hasSelection && (() => {
+          const selIdx = dims.findIndex(d => d.name === selectedDim)
+          if (selIdx < 0) return null
+          const prev = (selIdx - 1 + dims.length) % dims.length
+          const next = (selIdx + 1) % dims.length
+          const pts  = [selIdx, prev, next].map(idx => {
+            const r = (dims[idx].score / maxScore) * maxR
+            return polarToCartesian(cx, cy, r, dims[idx].angle)
+          })
+          const color = PILLAR_COLORS[dims[selIdx].pilar] || DEFAULT_COLOR
+          // Línea resaltada solo para esa dimensión
+          const selPt = pts[0]
+          return (
+            <g>
+              <line x1={cx} y1={cy}
+                x2={selPt.x.toFixed(1)} y2={selPt.y.toFixed(1)}
+                stroke={color} strokeWidth="2" opacity="0.8"
+              />
+            </g>
+          )
+        })()}
+
+        {/* Puntos, scores y etiquetas */}
         {dims.map((d, i) => {
-          const r = (d.score / maxScore) * maxR
-          const pt = polarToCartesian(cx, cy, r, d.angle)
-          const labelPt = polarToCartesian(cx, cy, labelR, d.angle)
-          const color = PILLAR_COLORS[d.pilar] || DEFAULT_COLOR
+          const r         = (d.score / maxScore) * maxR
+          const pt        = polarToCartesian(cx, cy, r, d.angle)
+          const labelPt   = polarToCartesian(cx, cy, labelR, d.angle)
+          const color     = PILLAR_COLORS[d.pilar] || DEFAULT_COLOR
+          const angleN    = ((d.angle % 360) + 360) % 360
+          const isSelected = d.name === selectedDim
+          const dimmed    = hasSelection && !isSelected
+          const opacity   = dimmed ? 0.25 : 1
 
-          // Calcular anclaje de texto
-          const angleNorm = ((d.angle % 360) + 360) % 360
           let textAnchor = 'middle'
-          if (angleNorm > 20 && angleNorm < 160) textAnchor = 'start'
-          else if (angleNorm > 200 && angleNorm < 340) textAnchor = 'end'
+          if      (angleN > 15  && angleN < 165) textAnchor = 'start'
+          else if (angleN > 195 && angleN < 345) textAnchor = 'end'
 
-          // Offset Y para labels arriba/abajo
-          let dyLabel = 0
-          if (angleNorm > 340 || angleNorm < 20) dyLabel = -8
-          else if (angleNorm > 160 && angleNorm < 200) dyLabel = 10
+          let dyExtra = 0
+          if (angleN > 160 && angleN < 200) dyExtra = 6
 
-          const label = lang === 'en' ? d.nameEn : d.name
-          // Partir el label si es largo
-          const words = label.split(' ')
-          const mid = Math.ceil(words.length / 2)
-          const line1 = words.slice(0, mid).join(' ')
-          const line2 = words.slice(mid).join(' ')
+          const label  = lang === 'en' ? d.nameEn : d.name
+          const lines  = splitLabel(label, 18)
+          const lineH  = 13
+          const blockH = lines.length * lineH
+          const yStart = labelPt.y - blockH / 2 + lineH / 2 + dyExtra
+
+          const scoreOffX   = angleN < 180 ? 10 : -10
+          const scoreAnchor = angleN < 180 ? 'start' : 'end'
+
+          // Zona clickeable: combina punto + etiqueta
+          const hitPt = polarToCartesian(cx, cy, (labelR + maxR) / 2, d.angle)
 
           return (
-            <g key={i}>
-              {/* Punto */}
-              <circle cx={pt.x.toFixed(1)} cy={pt.y.toFixed(1)}
-                r="5" fill={color} stroke="white" strokeWidth="1.5" />
+            <g key={i}
+              style={{ cursor: 'pointer' }}
+              onClick={() => onSelectDim(isSelected ? null : d.name)}
+            >
+              {/* Zona de clic invisible */}
+              <circle
+                cx={hitPt.x.toFixed(1)} cy={hitPt.y.toFixed(1)}
+                r="38" fill="transparent"
+              />
 
-              {/* Score junto al punto */}
+              {/* Resaltado fondo si seleccionado */}
+              {isSelected && (
+                <circle
+                  cx={labelPt.x.toFixed(1)} cy={labelPt.y.toFixed(1)}
+                  r="28" fill={color} opacity="0.08"
+                />
+              )}
+
+              {/* Punto */}
+              <circle
+                cx={pt.x.toFixed(1)} cy={pt.y.toFixed(1)}
+                r={isSelected ? 7 : 5}
+                fill={color} stroke="white"
+                strokeWidth={isSelected ? 2.5 : 1.5}
+                opacity={opacity}
+              />
+
+              {/* Score numérico */}
               <text
-                x={(pt.x + (angleNorm < 180 ? 10 : -10)).toFixed(1)}
+                x={(pt.x + scoreOffX).toFixed(1)}
                 y={(pt.y + 4).toFixed(1)}
-                fontSize="9.5"
-                fontWeight="600"
+                fontSize={isSelected ? '10.5' : '9.5'}
+                fontWeight={isSelected ? '800' : '700'}
                 fontFamily="DM Mono, monospace"
                 fill={color}
-                textAnchor={angleNorm < 180 ? 'start' : 'end'}
+                textAnchor={scoreAnchor}
+                opacity={opacity}
               >
                 {d.score?.toFixed(2)}
               </text>
 
-              {/* Label dimensión */}
-              <text
-                x={labelPt.x.toFixed(1)}
-                y={(labelPt.y + dyLabel).toFixed(1)}
-                fontSize="9"
-                fontFamily="DM Sans, sans-serif"
-                fill={color}
-                fontWeight="500"
-                textAnchor={textAnchor}
-              >
-                {line2 ? (
-                  <>
-                    <tspan x={labelPt.x.toFixed(1)} dy="0">{line1}</tspan>
-                    <tspan x={labelPt.x.toFixed(1)} dy="11">{line2}</tspan>
-                  </>
-                ) : label}
-              </text>
+              {/* Etiqueta dimensión */}
+              {lines.map((line, li) => (
+                <text key={li}
+                  x={labelPt.x.toFixed(1)}
+                  y={(yStart + li * lineH).toFixed(1)}
+                  fontSize={isSelected ? '10.5' : '9.5'}
+                  fontFamily="DM Sans, sans-serif"
+                  fill={color}
+                  fontWeight={isSelected ? '700' : '500'}
+                  textAnchor={textAnchor}
+                  opacity={opacity}
+                  textDecoration={isSelected ? 'underline' : 'none'}
+                >
+                  {line}
+                </text>
+              ))}
             </g>
           )
         })}
 
-        {/* Score global en el centro */}
+        {/* Score global */}
         {globalScore && (
           <g>
-            <circle cx={cx} cy={cy} r="30" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <text x={cx} y={cy + 2} textAnchor="middle" dominantBaseline="middle"
-              fontSize="18" fontWeight="800" fontFamily="DM Mono, monospace"
-              fill="#1a5c2a">
+            <circle cx={cx} cy={cy} r="34" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <text x={cx} y={cy + 1}
+              textAnchor="middle" dominantBaseline="middle"
+              fontSize="18" fontWeight="800"
+              fontFamily="DM Mono, monospace" fill="#1a5c2a">
               {globalScore}
             </text>
           </g>
         )}
       </svg>
 
-      {/* Leyenda pilares */}
-      <div style={{
-        display: 'flex', flexWrap: 'wrap', gap: '8px',
-        justifyContent: 'center', marginTop: '12px'
-      }}>
+      {/* Leyenda */}
+      <div style={{ display:'flex', flexWrap:'wrap', gap:'10px', justifyContent:'center', marginTop:10 }}>
         {Object.entries(PILLAR_COLORS).map(([pilar, color]) => (
-          <div key={pilar} style={{
-            display: 'flex', alignItems: 'center', gap: '5px',
-            fontSize: '.7rem', color: '#6b7280'
-          }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
-            {lang === 'en' ? {
-              'Gestión y Gobierno del Dato': 'Data Management & Governance',
-              'Consumo de Información': 'Information Consumption',
-              'Analítica Avanzada': 'Advanced Analytics',
-              'Estrategia del Dato': 'Data Strategy',
-            }[pilar] : pilar}
+          <div key={pilar} style={{ display:'flex', alignItems:'center', gap:5, fontSize:'.72rem', color:'#6b7280' }}>
+            <div style={{ width:9, height:9, borderRadius:'50%', background:color, flexShrink:0 }} />
+            {lang === 'en' ? PILLAR_EN[pilar] : pilar}
           </div>
         ))}
+      </div>
+
+      {/* Hint clic */}
+      <div style={{ textAlign:'center', fontSize:'.68rem', color:'#9ca3af', marginTop:6 }}>
+        {lang === 'en'
+          ? '↑ Click a dimension to see the detail'
+          : '↑ Haz clic en una dimensión para ver el detalle'}
       </div>
     </div>
   )

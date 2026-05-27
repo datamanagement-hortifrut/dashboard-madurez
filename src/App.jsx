@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useMemo } from 'react'
 /**
  * App.jsx — Dashboard de Madurez de Datos
  * Lee Google Sheets, calcula scores y muestra:
@@ -6,9 +7,10 @@
  * - Tabla de dimensiones con scores
  * - Avance de respuestas por grupo
  */
-import { useState, useEffect, useMemo } from 'react'
+
 import { fetchAllResponses, calcScores, filterRows } from './dataService.js'
 import RadarChart from './RadarChart.jsx'
+import DimensionDetail from './DimensionDetail.jsx'
 import questionsData from './questions.json'
 import employeesData from './employees.json'
 
@@ -103,7 +105,8 @@ function GroupProgress({ group, data, lang }) {
 }
 
 // ── Vista: Overview ─────────────────────────────────────────
-function OverviewView({ scores, rows, lang }) {
+function OverviewView({ scores, rows, questions, lang }) {
+  const [selectedDim, setSelectedDim] = React.useState(null)
   if (!scores) return (
     <div className="loading-center">
       <div style={{ fontSize: '2rem' }}>📊</div>
@@ -287,6 +290,7 @@ function FilteredView({ rows, questions, employees, lang }) {
     ? `${lang === 'en' ? 'Score for' : 'Score para'} ${selPais}`
     : lang === 'en' ? 'All Countries' : 'Todos los países'
 
+  const [selectedDim, setSelectedDim] = React.useState(null)
   return (
     <div>
       <div className="filter-bar">
@@ -340,6 +344,7 @@ function FilteredView({ rows, questions, employees, lang }) {
 function GroupsView({ rows, questions, employees, lang }) {
   const groups = useMemo(() => [...new Set(rows.map(r => r.grupo).filter(Boolean))].sort(), [rows])
   const [selGroup, setSelGroup] = useState(groups[0] || '')
+  const [selectedDim, setSelectedDim] = React.useState(null)
 
   const filteredRows = useMemo(() =>
     selGroup ? rows.filter(r => r.grupo === selGroup) : rows,
@@ -406,6 +411,7 @@ function GroupsView({ rows, questions, employees, lang }) {
 // ── ROOT APP ────────────────────────────────────────────────
 export default function App() {
   const [view,    setView]    = useState('overview')
+  const [radarSelectedDim, setRadarSelectedDim] = useState(null)
   const [lang,    setLang]    = useState(() => navigator.language?.startsWith('en') ? 'en' : 'es')
   const [rows,    setRows]    = useState([])
   const [loading, setLoading] = useState(true)
@@ -526,13 +532,18 @@ export default function App() {
           </div>
         ) : (
           <>
-            {view === 'overview'   && <OverviewView scores={scores} rows={rows} lang={lang} />}
+            {view === 'overview'   && <OverviewView scores={scores} rows={rows} questions={questions} lang={lang} />}
             {view === 'radar'      && (
               <div className="card card-pad">
                 <div className="section-title">{lang === 'en' ? 'Company Level — All Dimensions' : 'Nivel Compañía — Todas las Dimensiones'}</div>
                 <div className="radar-wrap" style={{ padding: '20px 0' }}>
                   {scores
-                    ? <RadarChart dimensions={scores.dimensions} size={580} lang={lang} />
+                    ? <>
+                        <RadarChart dimensions={scores.dimensions} size={580} lang={lang}
+                          selectedDim={radarSelectedDim} onSelectDim={setRadarSelectedDim} />
+                        <DimensionDetail dimName={radarSelectedDim} rows={rows} questions={questions}
+                          lang={lang} onClose={() => setRadarSelectedDim(null)} />
+                      </>
                     : <div className="loading-center"><p>{lang === 'en' ? 'No data' : 'Sin datos'}</p></div>
                   }
                 </div>
