@@ -349,8 +349,9 @@ function FilteredView({ rows, questions, employees, lang }) {
 // ── Vista: Por Grupo ────────────────────────────────────────
 function GroupsView({ rows, questions, employees, lang }) {
   const groups = useMemo(() => [...new Set(rows.map(r => r.grupo).filter(Boolean))].sort(), [rows])
-  const [selGroup, setSelGroup] = useState(groups[0] || '')
-  const [selectedDim, setSelectedDim] = React.useState(null)
+  const [selGroup,      setSelGroup]      = useState(groups[0] || '')
+  const [selectedDim,   setSelectedDim]   = React.useState(null)
+  const [selectedPilar, setSelectedPilar] = React.useState(null)
 
   const filteredRows = useMemo(() =>
     selGroup ? rows.filter(r => r.grupo === selGroup) : rows,
