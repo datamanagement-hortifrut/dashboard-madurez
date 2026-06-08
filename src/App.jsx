@@ -90,7 +90,8 @@ function DimensionRow({ name, score, pilar, lang }) {
 }
 
 function GroupProgress({ group, data, lang }) {
-  const { responded, total, pct } = data
+  const { responded, total } = data
+  const pct = total > 0 ? +(responded / total * 100).toFixed(2) : 0
   return (
     <div className="progress-row">
       <span className="progress-label">{lang === 'en' ? group : (GROUP_NAMES[group] || group)}</span>
@@ -135,13 +136,13 @@ function OverviewView({ scores, rows, questions, lang }) {
           label={lang === 'en' ? 'Responses' : 'Respuestas'}
           value={scores.totalResponses}
           sub={`${lang === 'en' ? 'of' : 'de'} ${scores.totalParticipants} ${lang === 'en' ? 'participants' : 'participantes'}`}
-          pct={Math.round(scores.totalResponses / scores.totalParticipants * 100)}
+          pct={scores.totalParticipants > 0 ? scores.totalResponses / scores.totalParticipants * 100 : 0}
         />
         <KPICard
           label={lang === 'en' ? 'Participation' : 'Participación'}
-          value={`${Math.round(scores.totalResponses / scores.totalParticipants * 100)}%`}
+          value={scores.totalParticipants > 0 ? `${(scores.totalResponses / scores.totalParticipants * 100).toFixed(2)}%` : '0%'}
           sub={lang === 'en' ? 'response rate' : 'tasa de respuesta'}
-          pct={Math.round(scores.totalResponses / scores.totalParticipants * 100)}
+          pct={scores.totalParticipants > 0 ? scores.totalResponses / scores.totalParticipants * 100 : 0}
         />
         <KPICard
           label={lang === 'en' ? 'Dimensions evaluated' : 'Dimensiones evaluadas'}
@@ -516,7 +517,7 @@ export default function App() {
             <h2>{pageTitle[view]}</h2>
             <p>
               {scores
-                ? `${scores.totalResponses} ${lang === 'en' ? 'responses' : 'respuestas'} · ${Math.round(scores.totalResponses / scores.totalParticipants * 100)}% ${lang === 'en' ? 'participation' : 'participación'}`
+                ? `${scores.totalResponses} ${lang === 'en' ? 'responses' : 'respuestas'} · ${scores.totalParticipants > 0 ? (scores.totalResponses / scores.totalParticipants * 100).toFixed(2) : 0}% ${lang === 'en' ? 'participation' : 'participación'}`
                 : lang === 'en' ? 'Loading data…' : 'Cargando datos…'}
             </p>
           </div>

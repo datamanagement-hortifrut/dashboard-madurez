@@ -156,7 +156,7 @@ export function calcScores(rows, questions, employees) {
   groups.forEach(g => {
     const responded  = rows.filter(r => r.grupo === g).length
     const total      = empByGroup[g] || 0
-    byGroupParticip[g] = { responded, total, pct: total ? Math.round(responded / total * 100) : 0 }
+    byGroupParticip[g] = { responded, total, pct: total ? +(responded / total * 100).toFixed(2) : 0 }
   })
 
   return { global, dimensions, pillars, byGroup, byPais, totalResponses, totalParticipants, byGroupParticip }
