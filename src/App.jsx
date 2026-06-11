@@ -135,7 +135,7 @@ function OverviewView({ scores, rows, questions, lang }) {
         <KPICard
           label={lang === 'en' ? 'Responses' : 'Respuestas'}
           value={scores.totalResponses}
-          sub={`${lang === 'en' ? 'of' : 'de'} ${scores.totalParticipants} ${lang === 'en' ? 'participants' : 'participantes'}`}
+          sub={`${lang === 'en' ? 'of' : 'de'} ${scores.totalParticipants} ${lang === 'en' ? 'people' : 'personas'}`}
           pct={scores.totalParticipants > 0 ? scores.totalResponses / scores.totalParticipants * 100 : 0}
         />
         <KPICard
@@ -322,7 +322,7 @@ function FilteredView({ rows, questions, employees, lang }) {
                 {scores.global?.toFixed(2)}
               </span>
               <div style={{ fontSize: '.8rem', color: '#6b7280', marginTop: 2 }}>
-                {maturityLabel(scores.global, lang)} · {scores.totalResponses} {lang === 'en' ? 'responses' : 'respuestas'}
+                {maturityLabel(scores.global, lang)} · {scores.totalResponses} {lang === 'en' ? 'of' : 'de'} {scores.totalParticipants} {lang === 'en' ? 'people' : 'personas'}
               </div>
             </div>
             <div className="radar-wrap">
@@ -393,7 +393,7 @@ function GroupsView({ rows, questions, employees, lang }) {
                 {scores.global?.toFixed(2)}
               </span>
               <div style={{ fontSize: '.8rem', color: '#6b7280', marginTop: 2 }}>
-                {maturityLabel(scores.global, lang)} · {scores.totalResponses} {lang === 'en' ? 'responses' : 'respuestas'}
+                {maturityLabel(scores.global, lang)} · {scores.totalResponses} {lang === 'en' ? 'of' : 'de'} {scores.totalParticipants} {lang === 'en' ? 'people' : 'personas'}
               </div>
             </div>
             <div className="radar-wrap">
@@ -517,7 +517,7 @@ export default function App() {
             <h2>{pageTitle[view]}</h2>
             <p>
               {scores
-                ? `${scores.totalResponses} ${lang === 'en' ? 'responses' : 'respuestas'} · ${scores.totalParticipants > 0 ? (scores.totalResponses / scores.totalParticipants * 100).toFixed(2) : 0}% ${lang === 'en' ? 'participation' : 'participación'}`
+                ? `${scores.totalResponses} ${lang === 'en' ? 'of' : 'de'} ${scores.totalParticipants} ${lang === 'en' ? 'people' : 'personas'} · ${scores.totalParticipants > 0 ? (scores.totalResponses / scores.totalParticipants * 100).toFixed(2) : 0}% ${lang === 'en' ? 'participation' : 'participación'}`
                 : lang === 'en' ? 'Loading data…' : 'Cargando datos…'}
             </p>
           </div>
