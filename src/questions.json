@@ -66,12 +66,12 @@
     "opciones": [
       {
         "id": "R020201",
-        "texto": "Aprobada por Alta Dirección con sistema de seguimiento centralizado de su cumplimiento",
+        "texto": "Aprobada por C-Level con sistema de seguimiento centralizado de su cumplimiento",
         "texto_en": "Principles fully defined, communicated and actively applied across the organization"
       },
       {
         "id": "R020202",
-        "texto": "Aprobado por la Alta Dirección pero no existe un seguimiento periódico del grado de cumplimiento",
+        "texto": "Aprobado por la C-Level pero no existe un seguimiento periódico del grado de cumplimiento",
         "texto_en": "Principles defined and documented, with widespread but not universal adoption"
       },
       {
@@ -161,7 +161,7 @@
     "opciones": [
       {
         "id": "R030101",
-        "texto": "Sí, dando cobertura a la práctica totalidad de los términos de negocio",
+        "texto": "Sí, dando cobertura prácticamente en la totalidad de los términos de negocio.",
         "texto_en": "Comprehensive dictionary covering all critical domains, actively maintained and used by teams"
       },
       {
@@ -210,7 +210,7 @@
     "opciones": [
       {
         "id": "R030301",
-        "texto": "Se conoce de forma masiva y es primer punto de contacto para la consulta y gestión de los conceptos de negocio",
+        "texto": "Se conoce de forma masiva. Primer punto de contacto para la consulta y gestión de los conceptos de negocio.",
         "texto_en": "Metadata standards defined, documented and consistently applied across all critical systems"
       },
       {
@@ -259,27 +259,27 @@
     "opciones": [
       {
         "id": "R030401",
-        "texto": "Existe un modelo único que da cobertura a la totalidad de los términos de negocio",
+        "texto": "Existe un catálogo que da cobertura a la totalidad de los términos de negocio",
         "texto_en": "Mature catalog covering all critical assets, integrated with key systems and actively used"
       },
       {
         "id": "R030402",
-        "texto": "Existe un modelo de datos que da cobertura a más del 75% de los términos de negocio",
+        "texto": "Existe un catálogo de datos que da cobertura a más del 75% de los términos de negocio",
         "texto_en": "Catalog implemented for main assets with good adoption"
       },
       {
         "id": "R030403",
-        "texto": "Existe un modelo de datos que da cobertura entre el 50% y el 75% de los términos de negocio",
+        "texto": "Existe un catálogo de datos que da cobertura entre el 50% y el 75% de los términos de negocio",
         "texto_en": "Catalog exists but covers limited scope or has low utilization"
       },
       {
         "id": "R030404",
-        "texto": "Existen varios modelos de datos con cobertura parciales por ámbito",
+        "texto": "Existen varios catálogo de datos con cobertura parciales por ámbito",
         "texto_en": "Catalog being implemented or evaluated"
       },
       {
         "id": "R030405",
-        "texto": "No existe un modelo de datos de negocio",
+        "texto": "No existe un catálogo de datos",
         "texto_en": "No data catalog tool exists"
       }
     ]
@@ -311,12 +311,12 @@
       },
       {
         "id": "R040102",
-        "texto": "Hay patrones de captura por tipología pero procesos de captura no totalmente armonizados con Arq. Empresarial",
+        "texto": "Hay patrones de captura por tipología, pero procesos de captura no totalmente armonizados con Arq. Empresarial",
         "texto_en": "MDM strategy for main entities implemented and operational"
       },
       {
         "id": "R040103",
-        "texto": "Existen patrones de captura para datos estructurados pero no para los semi o no estructurados",
+        "texto": "Existen patrones de captura para datos estructurados, pero no para los semi o no estructurados",
         "texto_en": "MDM strategy defined but partially implemented"
       },
       {
@@ -386,7 +386,7 @@
     "pilar_en": "Data Management & Governance",
     "descripcion": "Tras la ingesta del dato, se debe realizar un proceso/s de transformación para convertirlo en información útil para el negocio con independencia de cómo vaya a ser consumido.",
     "descripcion_en": "Management of critical, shared data entities: customers, suppliers, products, employees.",
-    "pregunta": "¿Cúando se está midiendo el impacto de una buena captura y tratamiento de los datos?",
+    "pregunta": "¿Cuando se está midiendo el impacto de una buena captura y tratamiento de los datos?",
     "pregunta_en": "Is master data quality measured and monitored regularly?",
     "grupos": [
       "G2",
@@ -433,7 +433,7 @@
     "pilar_en": "Data Management & Governance",
     "descripcion": "Confianza en el uso del dato disponible, existiendo circuitos habilitados para su mejora continua.",
     "descripcion_en": "Processes to capture, prioritize and satisfy information needs across the organization.",
-    "pregunta": "¿Qué tanta conciencia tiene Hortifrut sobre la calidad del datos?",
+    "pregunta": "¿Qué tanta conciencia tiene Hortifrut sobre la calidad de los datos?",
     "pregunta_en": "Is there a formal process to capture and prioritize information needs from business areas?",
     "grupos": [
       "G2",
@@ -448,7 +448,7 @@
     "opciones": [
       {
         "id": "R050101",
-        "texto": "Muy alto, la calidad de los datos es un objetivo cuantificado y seguido por la Alta Dirección",
+        "texto": "Muy alto, la calidad de los datos es un objetivo cuantificado y seguido por la C-Level",
         "texto_en": "Formal process with defined channels, clear prioritization and tracked resolution of requests"
       },
       {
@@ -615,7 +615,7 @@
       },
       {
         "id": "R060105",
-        "texto": "Existe una relación inicial de tratamientos pero no la garantía de su actualización",
+        "texto": "Existe una relación inicial de tratamientos, pero no la garantía de su actualización",
         "texto_en": "No data quality dimensions are formally defined"
       }
     ]
@@ -649,7 +649,7 @@
       },
       {
         "id": "R060302",
-        "texto": "Existe y se realizan de forma previa aunque es observado como un freno a la dinámica de negocio",
+        "texto": "Existe y se realizan de forma previa, aunque es observado como un freno a la dinámica de negocio",
         "texto_en": "Processes defined with assigned owners and regular follow-up"
       },
       {
@@ -693,7 +693,7 @@
     "opciones": [
       {
         "id": "R060401",
-        "texto": "El esquema de evaluación y cumplimiento está implantado y ya se ha auditado su cumplimiento",
+        "texto": "El esquema de evaluación y cumplimiento está implantado. Auditando su cumplimiento.",
         "texto_en": "Data quality is a mandatory requirement in all projects, with defined standards and acceptance criteria"
       },
       {
@@ -727,7 +727,7 @@
     "pilar_en": "Data Management & Governance",
     "descripcion": "Todo lo que hacemos con los datos tiene un impacto en las personas. Por ello debemos dotarnos de unos principios éticos del dato.",
     "descripcion_en": "Design and structure of data systems, flows and integration across the organization.",
-    "pregunta": "¿Qué nivel de conocimiento e involucramiento tiene la primera línea en dilemas éticos de datos?",
+    "pregunta": "¿Qué nivel de conocimiento e involucramiento tiene el C-Level en dilemas éticos de datos?",
     "pregunta_en": "Does Hortifrut have a documented enterprise data architecture?",
     "grupos": [
       "G2",
@@ -833,17 +833,17 @@
       },
       {
         "id": "R070402",
-        "texto": "Mayoría de algoritmos con control de sesgos y discrimaciones, si bien no existe un entorno de control formal",
+        "texto": "Mayoría de algoritmos con control de sesgos y discriminaciones, aunque no existe un marco de control formal.",
         "texto_en": "Analytical platform implemented and used by main areas"
       },
       {
         "id": "R070403",
-        "texto": "Algunos algoritmos incluyen control de sesgos y discrimaciones",
+        "texto": "Algunos algoritmos incluyen control de sesgos y discriminaciones.",
         "texto_en": "Platform implemented but with limited scope or adoption"
       },
       {
         "id": "R070404",
-        "texto": "No existen controles éticos en ningún algoritmo pero hay un plan para implantarlos en menos de 12 meses",
+        "texto": "No existen controles éticos en ningún algoritmo, pero hay un plan para implantarlos en menos de 12 meses",
         "texto_en": "Platform being implemented"
       },
       {
@@ -862,7 +862,7 @@
     "pilar_en": "Data Management & Governance",
     "descripcion": "Ecosistema corporativo (capacidades + modelo de datos) que da respuesta a las necesidades de tratamiento, uso y gestión de datos de la Compañía.",
     "descripcion_en": "Policies, controls and technologies to protect data confidentiality, integrity and availability.",
-    "pregunta": "¿Cómo es el grado de penetración de la arquitectura del datos entre el sistema operacional y el informacional?",
+    "pregunta": "¿Cómo es el grado de penetración de la arquitectura del datos entre los sistemas operacionales y de datos?",
     "pregunta_en": "Does Hortifrut have a formal information security policy for data?",
     "grupos": [
       "G4",
@@ -871,27 +871,27 @@
     "opciones": [
       {
         "id": "R080101",
-        "texto": "Alto, arquitectura operacional e informacional integradas en modelo único (visión negocio) para todos los usos",
+        "texto": "Muy Alto. Los sistemas operacionales y de datos están integrados de forma consistente, automatizada y gobernada, permitiendo una visión unificada de la información.",
         "texto_en": "Comprehensive, updated security policy applicable to all data assets, with regular audits"
       },
       {
         "id": "R080102",
-        "texto": "Medio-alto, los modelos de datos operacional e informacional dan cobertura parcial a los casos de uso",
+        "texto": "Alto. Prácticamente todos los sistemas relevantes están integrados mediante procesos estandarizados.",
         "texto_en": "Policy defined and applied to critical data with periodic reviews"
       },
       {
         "id": "R080103",
-        "texto": "Medio, arquitectura en operacional e informacional integradas parcialmente en un modelo, pero separadas entre ellas",
+        "texto": "Medio. La mayoría de los sistemas críticos alimentan la plataforma de datos, aunque aún existen brechas importantes.",
         "texto_en": "Policy exists but coverage or application is incomplete"
       },
       {
         "id": "R080104",
-        "texto": "Medio-bajo. Acciones para dar cobertura a modelos de datos integrados en operacional e informac., pero separados",
+        "texto": "Medio-Bajo. Algunos sistemas relevantes están integrados, pero existen numerosas fuentes aisladas.",
         "texto_en": "Policy in development"
       },
       {
         "id": "R080105",
-        "texto": "Bajo, arquitectura en silos y operacional separado del informacional",
+        "texto": "Bajo. La mayoría de los sistemas operacionales no están conectados a la plataforma de datos corporativa.",
         "texto_en": "No formal data security policy exists"
       }
     ]
@@ -957,7 +957,7 @@
     "opciones": [
       {
         "id": "R080401",
-        "texto": "Sí, los datos maestros se tratan como un activo y hay roles y procesos específicos para su gestión",
+        "texto": "Sí, los datos maestros se tratan como un activo, con roles y procesos específicos para su gestión.",
         "texto_en": "Comprehensive response plans, regularly tested and updated, with clear escalation paths"
       },
       {
@@ -1017,7 +1017,7 @@
       },
       {
         "id": "R090104",
-        "texto": "Existe una política de contraseñas pero no hay roles definidos para el acceso",
+        "texto": "Existe una política de contraseñas, pero no hay roles definidos para el acceso",
         "texto_en": "Data leadership role being defined or under evaluation"
       },
       {
@@ -1036,7 +1036,7 @@
     "pilar_en": "Data Management & Governance",
     "descripcion": "Medición y garantía de que la información está protegida y adecuadamente accesible.",
     "descripcion_en": "Organizational role responsible for leading the data strategy and governance.",
-    "pregunta": "¿Contamos con planes de contingencia definidos y de recuperación de la información y se revisan periódicamente?",
+    "pregunta": "¿Contamos con planes de contingencia definidos, recuperación de la información y revisión periódica?",
     "pregunta_en": "Is there a dedicated data team with defined roles and responsibilities?",
     "grupos": [
       "G1",
@@ -1057,7 +1057,7 @@
       },
       {
         "id": "R090303",
-        "texto": "Planes de contigencia y recuperación parciales y no cubren todos los procesos críticos de negocio/corporación",
+        "texto": "Planes de contingencia y recuperación parcial. No cubren todos los procesos críticos de negocio/corporación. ",
         "texto_en": "Team exists but with coverage gaps or unclear responsibilities"
       },
       {
@@ -1107,7 +1107,7 @@
       },
       {
         "id": "R090504",
-        "texto": "No existen KPI definidos pero se sigue cualitativamente el nivel de cumplimiento de las políticas de seguridad",
+        "texto": "No existen KPI definido, pero se sigue cualitativamente el nivel de cumplimiento de las políticas de seguridad",
         "texto_en": "Some informal results tracking"
       },
       {
@@ -1184,7 +1184,7 @@
     "opciones": [
       {
         "id": "R100301",
-        "texto": "El paso a producción de los desarrollos o productos de datos está automatizada y es revisada en casos puntuales",
+        "texto": "El paso a producción de los desarrollos o productos de datos están automatizadas. Revisados en casos puntuales.",
         "texto_en": "Structured training programs with regular updates, onboarding for new users and ongoing support"
       },
       {
@@ -1199,7 +1199,7 @@
       },
       {
         "id": "R100304",
-        "texto": "Usuarios con libertad para comenzar desarrollos departamentales pero necesitan presupuesto para paso a producción",
+        "texto": "Usuarios con libertad para comenzar desarrollos departamentales, pero necesitan presupuesto para paso a producción",
         "texto_en": "Informal learning in some areas"
       },
       {
@@ -1235,7 +1235,7 @@
       },
       {
         "id": "R100402",
-        "texto": "Media-alta. Existe visión holítica de los datos (ej. Virtualización) pero algunas infraestruturas son distintas",
+        "texto": "Media-alta. Existe visión holística de los datos pero algunas infraestruturas son distintas",
         "texto_en": "Satisfaction measured periodically with some improvements implemented"
       },
       {
@@ -1264,7 +1264,7 @@
     "pilar_en": "Information Consumption",
     "descripcion": "Es preciso adaptar la forma de presentar la información, acercándola al entendimiento de los usuarios. Mejor UX = Mayor Valor.",
     "descripcion_en": "Reports and dashboards that support operational and strategic decision-making.",
-    "pregunta": "¿Tenemos definida una herramienta para visualizacion de datos para los analístas?",
+    "pregunta": "¿Tenemos definida una herramienta para visualizacion de datos para los analistas?",
     "pregunta_en": "Does Hortifrut have a standardized management reporting framework?",
     "grupos": [
       "G3",
@@ -1277,27 +1277,27 @@
     "opciones": [
       {
         "id": "R110101",
-        "texto": "Sí. Definidos principios de uso en catálogo en función de las necesidades. Unificado para toda la organización",
+        "texto": "La herramienta oficial está completamente integrada al ecosistema de datos, con gobierno, capacitación, mejores prácticas, métricas de uso y mejora continua.",
         "texto_en": "Standardized framework covering all critical levels and functions, with governance and maintenance"
       },
       {
         "id": "R110102",
-        "texto": "Sí, hay un catálogo accesible con la marca de la compañía",
+        "texto": "La herramienta oficial está definida y es utilizada por la gran mayoría de los analistas. Existen lineamientos y soporte formal.",
         "texto_en": "Framework for main management levels with good adoption"
       },
       {
         "id": "R110103",
-        "texto": "Sí, hay un catálogo seleccionado sobre herramienta de BI&BigData",
+        "texto": "La organización ha definido una herramienta oficial para visualización de datos que debe utilizarse en la mayoría de los casos.",
         "texto_en": "Framework exists but with significant gaps or limited adoption"
       },
       {
         "id": "R110104",
-        "texto": "Sí, las que aportan las herramientas de BI & BigData homologadas",
+        "texto": "Existe una herramienta recomendada, pero no es obligatoria y convive con otras alternativas.",
         "texto_en": "Framework in development"
       },
       {
         "id": "R110105",
-        "texto": "No, depende de los proyectos",
+        "texto": "No existe una herramienta definida. Cada analista utiliza la que considera más conveniente.",
         "texto_en": "No standardized management reporting framework"
       }
     ]
@@ -1311,7 +1311,7 @@
     "pilar_en": "Information Consumption",
     "descripcion": "Es preciso adaptar la forma de presentar la información, acercándola al entendimiento de los usuarios. Mejor UX = Mayor Valor.",
     "descripcion_en": "Reports and dashboards that support operational and strategic decision-making.",
-    "pregunta": "¿Está integrada la experiencia de usuario en la creación de informes y/o Cuadros de Mando?",
+    "pregunta": "¿Está integrada la experiencia de usuario en la creación de informes y/o Dashboard?",
     "pregunta_en": "Do management reports have a single, validated and trusted data source?",
     "grupos": [
       "G3",
@@ -1324,12 +1324,12 @@
     "opciones": [
       {
         "id": "R110301",
-        "texto": "Sí. Hay principios de diseño y el equipo Datos asegura la UX (ex-ante) en el consumo de la información",
+        "texto": "Sí. Hay principios de diseño y el equipo Datos asegura la UX/UI en el consumo de la información",
         "texto_en": "All critical reports use validated single sources with documented lineage and version control"
       },
       {
         "id": "R110302",
-        "texto": "Sí. Hay principios de diseño y un equipo revisa UX ex-post en distribuciones importantes y genera recomendaciones",
+        "texto": "Sí. Hay principios de diseño y un equipo revisa UX/UI en distribuciones importantes y genera recomendaciones",
         "texto_en": "Most reports use single sources with good validation"
       },
       {
@@ -1339,12 +1339,12 @@
       },
       {
         "id": "R110304",
-        "texto": "Escasamente, se cuida el UX en algunos canales de distribución pero no homogéneamente entre ellos",
+        "texto": "Escasamente, se cuida el UX/UI en algunas areas pero no necesariamente iguales entre ellos",
         "texto_en": "Frequent inconsistencies between reports due to different sources"
       },
       {
         "id": "R110305",
-        "texto": "No oficialmente, los cuadros de mando son creados por los analistas o desarrollados de manera independiente",
+        "texto": "No oficialmente, los dashboard son creados por los analistas o desarrollados de manera independiente",
         "texto_en": "Management reports do not have single, trusted data sources"
       }
     ]
@@ -1421,7 +1421,7 @@
       },
       {
         "id": "R120102",
-        "texto": "Fuentes mayoritariam. automáticas. Ajustes manuales gobernados: responsables, documentados, trazables, replicables",
+        "texto": "Fuentes mayoritariamente automáticas. Ajustes manuales gobernados con responsables, documentos, trazables, replicables.",
         "texto_en": "Main regulatory reports automated with validation processes"
       },
       {
@@ -1461,12 +1461,12 @@
     "opciones": [
       {
         "id": "R120201",
-        "texto": "Los datos de gestión forman parte del glosario de términos global, siendo reusados como únicos en todos los casos",
+        "texto": "Reutilización de datos: para todos los fines, gestión, regulatorios y modelado.",
         "texto_en": "All regulatory deadlines met consistently with early warning systems and contingency plans"
       },
       {
         "id": "R120202",
-        "texto": "Los datos de gestión se reusan para los reportes regulatorios y para algunos modelos avanzados",
+        "texto": "Los datos de gestión se reutilizan para los reportes regulatorios y para algunos modelos avanzados",
         "texto_en": "Regulatory deadlines generally met with minor exceptions"
       },
       {
@@ -1562,7 +1562,7 @@
       },
       {
         "id": "R130103",
-        "texto": "Se empieza a compartir pero no se ve el valor capturado",
+        "texto": "Se empieza a compartir, pero no se ve el valor capturado",
         "texto_en": "Tools available but with limited adoption or significant barriers"
       },
       {
@@ -1598,7 +1598,7 @@
     "opciones": [
       {
         "id": "R130201",
-        "texto": "Centralizadamente todos los tipos de data product garantizando seguridad y privacidad. Acceso simple (ej APIs)",
+        "texto": "Centralizadamente todos los tipos de productos de datos garantizando seguridad y privacidad. Acceso simple (ej APIs)",
         "texto_en": "Policies defined with certification, approval and quality control processes for self-service content"
       },
       {
@@ -1678,7 +1678,7 @@
     "pilar_en": "Advanced Analytics",
     "descripcion": "Es la piedra angular de la democratización del dato: la capitalización del conocimiento del usuario a través de los datos puestos a su disposición.",
     "descripcion_en": "Processes for creating, validating and maintaining predictive and analytical models.",
-    "pregunta": "¿Qué grado de centralización tiene la información de explotación? (no tiene que ser física)",
+    "pregunta": "¿Qué grado de centralización tiene la información para explotación? (no tiene que ser física)",
     "pregunta_en": "Does Hortifrut have a formal methodology for developing analytical or predictive models?",
     "grupos": [
       "G4",
@@ -1688,27 +1688,27 @@
     "opciones": [
       {
         "id": "R140101",
-        "texto": "La capa de explotación está centralizada al 100% (ya sea físicamente o virtualmente). Se contempla el Data Fabric",
+        "texto": "Toda la información crítica para la toma de decisiones se encuentra integrada, catalogada, gobernada y disponible mediante una arquitectura única y escalable.",
         "texto_en": "Formal methodology covering full lifecycle with standards, peer review and documentation"
       },
       {
         "id": "R140102",
-        "texto": "La capa de explotación está centralizada al 75% (ya sea físicamente o virtualmente)",
+        "texto": "Existe una plataforma corporativa (Data Warehouse, Data Lake, Lakehouse, etc.) donde se concentra la mayor parte de la información utilizada para análisis.",
         "texto_en": "Methodology defined for main model types with good adoption"
       },
       {
         "id": "R140103",
-        "texto": "La capa de explotación está centralizada al 50% (ya sea físicamente o virtualmente)",
+        "texto": "La mayoría de la información relevante se encuentra disponible en repositorios comunes o plataformas corporativas.",
         "texto_en": "Methodology exists but applied inconsistently"
       },
       {
         "id": "R140104",
-        "texto": "La capa de explotación está centralizada al 25% (ya sea físicamente o virtualmente)",
+        "texto": "Existen algunas fuentes consolidadas, pero gran parte de la información sigue dispersa y requiere integraciones manuales.",
         "texto_en": "Methodology in development"
       },
       {
         "id": "R140105",
-        "texto": "La organización tiene silos por áreas sin un diccionario o modelo de explotación claro",
+        "texto": "La información se encuentra distribuida en múltiples sistemas, archivos y bases de datos sin integración.",
         "texto_en": "No formal model development methodology"
       }
     ]
@@ -1722,7 +1722,7 @@
     "pilar_en": "Advanced Analytics",
     "descripcion": "Es la piedra angular de la democratización del dato: la capitalización del conocimiento del usuario a través de los datos puestos a su disposición.",
     "descripcion_en": "Processes for creating, validating and maintaining predictive and analytical models.",
-    "pregunta": "¿Qué tiempo se invierte para realizar análisis ad-hoc?",
+    "pregunta": "¿Qué tiempo se invierte para realizar análisis para toma de decisiones?",
     "pregunta_en": "Is there a model registry or inventory of all analytical models in production or development?",
     "grupos": [
       "G4",
@@ -1810,7 +1810,7 @@
     "pilar_en": "Advanced Analytics",
     "descripcion": "Creación de modelos y seguimiento avanzado del ciclo de vida completo.",
     "descripcion_en": "Processes for deploying, automating and scaling analytical models in production.",
-    "pregunta": "Los equipos que desarrollan los modelos, ¿se encuentran gobernados de alguna manera?",
+    "pregunta": "Los equipos que desarrollan los modelos analíticos, ¿se encuentran gobernados de alguna manera?",
     "pregunta_en": "Does Hortifrut have MLOps processes for deploying and operating models in production?",
     "grupos": [
       "G4",
@@ -1992,27 +1992,27 @@
     "opciones": [
       {
         "id": "R160301",
-        "texto": "Tenemos un alarmado que nos avisa cuando hay un cambio en las variables de nuestros modelos",
+        "texto": "El desempeño se monitorea continuamente mediante procesos automatizados, detección de drift, recalibración y mejora continua.",
         "texto_en": "Detailed roadmap with defined milestones, accountable owners and active progress tracking"
       },
       {
         "id": "R160302",
-        "texto": "La monitorización de las variables está automatizada",
+        "texto": "Se utilizan indicadores, métricas y alertas para supervisar regularmente el desempeño y detectar desviaciones.",
         "texto_en": "Roadmap with main milestones and general owners"
       },
       {
         "id": "R160303",
-        "texto": "Tenemos una tarea trimestral de monitorización que intentantamos cumplir",
+        "texto": "Existen revisiones programadas para evaluar el desempeño de los modelos y su precisión.",
         "texto_en": "Roadmap exists but lacks detail or clear ownership"
       },
       {
         "id": "R160304",
-        "texto": "Si vemos que la campaña genera menos retornos, vamos a ver la evolución de las variables",
+        "texto": "Los resultados se revisan ocasionalmente cuando surge algún problema o solicitud específica.",
         "texto_en": "Roadmap in development"
       },
       {
         "id": "R160305",
-        "texto": "No se monitoriza, solo analizamos si se queja negocio",
+        "texto": "Una vez implementados, los modelos no son monitoreados ni evaluados periódicamente.",
         "texto_en": "No data strategy implementation roadmap"
       }
     ]
@@ -2034,7 +2034,7 @@
     "opciones": [
       {
         "id": "R160401",
-        "texto": "Formulas de medición estables y monitorización automática de los grupos de control para verificar su legitimidad",
+        "texto": "Fórmulas de medición estables y monitorización automática de los grupos de control para verificar su legitimidad",
         "texto_en": "Regular reviews with executive committee, documented updates and strategic re-prioritization as needed"
       },
       {
@@ -2044,7 +2044,7 @@
       },
       {
         "id": "R160403",
-        "texto": "Se han definido grupos de control  pero la imputación del valor generado cambia todos los años",
+        "texto": "Se han definido grupos de control, pero la imputación del valor generado cambia todos los años",
         "texto_en": "Reviews occur but without systematic follow-up"
       },
       {
@@ -2126,17 +2126,17 @@
     "opciones": [
       {
         "id": "R170201",
-        "texto": "Sí, hay unas politicas que todos los que desarrollan los modelos han de seguir",
+        "texto": "Sí, hay unas políticas que todos los que desarrollan los modelos han de seguir",
         "texto_en": "Complete, updated inventory of all personal data with documented legal basis for each processing"
       },
       {
         "id": "R170202",
-        "texto": "Hay unas políticas definidas pero no se siguen por todos los equipos",
+        "texto": "Hay unas políticas definidas, pero no se siguen por todos los equipos",
         "texto_en": "Inventory for main personal data with defined legal bases"
       },
       {
         "id": "R170203",
-        "texto": "Hay una política pero solo se sigue por algunos equipos",
+        "texto": "Hay una política, pero solo se sigue por algunos equipos",
         "texto_en": "Partial inventory with significant gaps"
       },
       {
@@ -2312,7 +2312,7 @@
       },
       {
         "id": "R180502",
-        "texto": "Existe una estrategia del dato global y es liderada por un Directivo de Alta Dirección",
+        "texto": "Existe una estrategia del dato global y es liderada por un Directivo de C-Level",
         "texto_en": "Main critical assets identified with protection processes"
       },
       {
@@ -2355,7 +2355,7 @@
     "opciones": [
       {
         "id": "R190101",
-        "texto": "Todos los casos de uso vinculados a un KPI estratégico con medición de impacto estimado y monitorización posterior",
+        "texto": "Todos los casos de uso están vinculados a un KPI estratégico con medición de impacto estimado y monitorización posterior",
         "texto_en": "Active monetization strategy with implemented use cases and measured results"
       },
       {
@@ -2451,27 +2451,27 @@
     "opciones": [
       {
         "id": "R190501",
-        "texto": "Todo proyecto informacional debe ir acompañado de un ROI completo, objetivo y validado por CFO/CEO",
+        "texto": "Todo proyecto de datos debe ir acompañado de un ROI completo, objetivo y validado por CFO/CEO",
         "texto_en": "Structured innovation process that regularly uses data to identify and develop new opportunities"
       },
       {
         "id": "R190502",
-        "texto": "Solo los proyectos informacionales más relevantes disponen de un ROI completo",
+        "texto": "Solo los proyectos de datos más relevantes disponen de un ROI completo",
         "texto_en": "Innovation process that uses data as input for some opportunities"
       },
       {
         "id": "R190503",
-        "texto": "Proyectos informacionales con coste y aportación de valor estimados, pero KPIs no homogéneos ni validados",
+        "texto": "Proyectos de datis con costo y aportación de valor estimados, pero KPIs no homogéneos ni validados",
         "texto_en": "Occasional use of data in innovation without systematic process"
       },
       {
         "id": "R190504",
-        "texto": "Proyectos informacionales con coste estimado pero la aportación de valor es subjetiva y no es informada",
+        "texto": "Proyectos de datos con costo estimado pero la aportación de valor es subjetiva y no es informada",
         "texto_en": "Some data use in innovation"
       },
       {
         "id": "R190505",
-        "texto": "No es una métrica empleada en las acciones informacionales",
+        "texto": "No es una métrica que se use.",
         "texto_en": "Data is not systematically used in the innovation process"
       }
     ]
@@ -2485,7 +2485,7 @@
     "pilar_en": "Data Management & Governance",
     "descripcion": "El cemento que hace sostenible la estrategia del dato.",
     "descripcion_en": "Principles and practices for responsible, fair and transparent use of data and algorithms.",
-    "pregunta": "¿Qué tan de conciencia tiene Hortifrut sobre la propiedad del datos?",
+    "pregunta": "¿Qué tanta conciencia hay en Hortifrut sobre la privacidad de los datos?",
     "pregunta_en": "Does Hortifrut have formal principles or a code of data ethics?",
     "grupos": [
       "G1",
@@ -2575,7 +2575,7 @@
     "pilar_en": "Data Management & Governance",
     "descripcion": "El cemento que hace sostenible la estrategia del dato.",
     "descripcion_en": "Principles and practices for responsible, fair and transparent use of data and algorithms.",
-    "pregunta": "¿Qué papel juega la Primera Línea en la generación de una cultura data-driven?",
+    "pregunta": "¿Qué papel juega el C-Level en la generación de una cultura data-driven?",
     "pregunta_en": "Does Hortifrut have processes to detect and mitigate bias in datasets or models?",
     "grupos": [
       "G1",
@@ -2586,22 +2586,22 @@
     "opciones": [
       {
         "id": "R200401",
-        "texto": "La Alta Dirección establece la estrategia global y transversal para una cultura del dato y monitoriza su evolución",
+        "texto": "El C-Level establece la estrategia global y transversal para una cultura del dato y monitoriza su evolución",
         "texto_en": "Formal processes for bias detection and mitigation, with regular audits and documented corrections"
       },
       {
         "id": "R200402",
-        "texto": "La Alta Dirección establece planes de formación, comunicación y talento con seguimiento de avances de cada ámbito",
+        "texto": "El C-Level establece planes de formación, comunicación y talento con seguimiento de avances de cada ámbito",
         "texto_en": "Processes for main models with regular bias evaluation"
       },
       {
         "id": "R200403",
-        "texto": "La Alta Dirección establece planes de formación en data y realiza seguimiento de avances individuales por ámbito",
+        "texto": "El C-Level establece planes de formación en data y realiza seguimiento de avances individuales por ámbito",
         "texto_en": "Some detection without systematic mitigation"
       },
       {
         "id": "R200404",
-        "texto": "La Alta Dirección fomenta el uso de los datos en cada unidad, sin una estrategia común",
+        "texto": "El C-Level fomenta el uso de los datos en cada unidad, sin una estrategia común",
         "texto_en": "Informal consideration in some cases"
       },
       {
@@ -2637,27 +2637,27 @@
     "opciones": [
       {
         "id": "R210101",
-        "texto": "En función de un business case con ingresos, costes y mejora de datos de la organización (reusabilidad)",
+        "texto": "La priorización está alineada con la estrategia corporativa y utiliza métricas objetivas de valor, beneficios esperados, riesgos y capacidad disponible.",
         "texto_en": "Data systematically used at all levels with documented processes and leadership that models the behavior"
       },
       {
         "id": "R210102",
-        "texto": "En función del coste y ahorros. Beneficio esperado: cualitativo. Primeras fórmulas de cuantificación del valor",
+        "texto": "Existe un proceso formal con participación de negocio y tecnología para evaluar y priorizar iniciativas de manera periódica.",
         "texto_en": "Data used in most decisions at main levels"
       },
       {
         "id": "R210103",
-        "texto": "Se prioriza en función del coste y ahorros, pero alineado con la estrategía",
+        "texto": "Los proyectos se evalúan utilizando criterios definidos, como impacto, esfuerzo, riesgo o alineamiento estratégico.",
         "texto_en": "Data used in some decisions but not systematically"
       },
       {
         "id": "R210104",
-        "texto": "Se prioriza en función del coste y los ahorros esperados, con la capacidad disponible",
+        "texto": "Existen algunos criterios de priorización, pero no están formalizados ni se aplican de manera consistente.",
         "texto_en": "Data occasionally used in decisions"
       },
       {
         "id": "R210105",
-        "texto": "No existe priorización. Ejecución por orden de entrada, capacidad diponible o por las áreas usuarias directamente",
+        "texto": "Los proyectos se priorizan principalmente por urgencias, solicitudes puntuales o influencia de los solicitantes.",
         "texto_en": "Data is not systematically used in organizational decision-making"
       }
     ]
@@ -2688,17 +2688,17 @@
     "opciones": [
       {
         "id": "R210301",
-        "texto": "Existe un Comité donde están representados todos los intervinientes",
+        "texto": "Existe un Comité donde están representados todas las áreas",
         "texto_en": "Comprehensive data literacy program with structured levels, certifications and mandatory for relevant roles"
       },
       {
         "id": "R210302",
-        "texto": "Existe un Comité donde están representados CDO, IT y algunas áreas usuarias",
+        "texto": "Existe un Comité donde están representados el área de DATOS, IT y algunas áreas usuarias",
         "texto_en": "Program covering main areas with good adoption"
       },
       {
         "id": "R210303",
-        "texto": "Existe un Comité donde está representado CDO e IT",
+        "texto": "Existe un Comité donde está representada el área de DATOS e IT",
         "texto_en": "Program exists but with limited scope or coverage"
       },
       {
@@ -2871,7 +2871,7 @@
     "pilar_en": "Data Strategy",
     "descripcion": "No hay supervivencia sin adaptación, pero esta adaptación no se improvisa, requiere una estrategia de gestión del cambio.",
     "descripcion_en": "Processes to manage organizational change associated with data and analytics initiatives.",
-    "pregunta": "¿Cómo es el grado de involucración de la alta dirección en la gestión del cambio?",
+    "pregunta": "¿Cómo es el grado de involucración del C-Level en la gestión del cambio?",
     "pregunta_en": "Are the organizational impacts of data initiatives assessed before implementation?",
     "grupos": [
       "G1",
