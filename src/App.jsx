@@ -435,190 +435,133 @@ const GROUP_COLORS_HEX = {
   G8b:'#9E48C6', G8c:'#B07FD4', G9:'#1F3864',
 }
 
-function ParticipationView({ rows, employees, lang, loading = false }) {
-  const [selGroup,  setSelGroup]  = useState('G1')
-  const [search,    setSearch]    = useState('')
-  const [filterSt,  setFilterSt]  = useState('all') // all | answered | pending
+// ── Vista: Participación detallada ───────────────────────────
+const PART_GROUPS = ['G1','G2','G3','G4','G5','G6','G7a','G7b','G8b','G8c','G9']
+const PART_NAMES  = {
+  G1:'Alta Dirección',  G2:'Directores/Gerentes', G3:'Jefes/Subgerentes',
+  G4:'Datos & BI',      G5:'TI & Tecnología',     G6:'Creadores Reportes',
+  G7a:'Consumidores',   G7b:'Profesionales',       G8b:'Aprobadores MDM',
+  G8c:'Operadores MDM', G9:'Data Owners',
+}
+const PART_COLORS = {
+  G1:'#C00000', G2:'#E26B0A', G3:'#F79646', G4:'#4472C4', G5:'#2E75B6',
+  G6:'#70AD47', G7a:'#5B9BD5', G7b:'#4BACC6', G8b:'#9E48C6', G8c:'#B07FD4', G9:'#1F3864',
+}
 
-  // Respondentes — normalizar emails
-  const respondedEmails = useMemo(() =>
-    new Set(rows.map(r => (r.email || '').toLowerCase().trim())),
-    [rows]
+function ParticipationView({ rows, employees, lang, loading }) {
+  const [selGroup, setSelGroup] = useState('G1')
+  const [search,   setSearch]   = useState('')
+  const [filter,   setFilter]   = useState('all')
+
+  const respondedSet = new Set(
+    (rows || []).map(r => (r.email || '').toLowerCase().trim()).filter(Boolean)
   )
 
-  // Empleados del grupo seleccionado
-  const groupEmps = useMemo(() =>
-    employees
-      .filter(e => e.grupo === selGroup)
-      .map(e => ({
-        ...e,
-        answered: respondedEmails.has((e.email || '').toLowerCase().trim()),
-      }))
-      .sort((a, b) => {
-        // Respondidos al fondo, pendientes arriba
-        if (a.answered !== b.answered) return a.answered ? 1 : -1
-        return a.nombre.localeCompare(b.nombre)
-      }),
-    [employees, selGroup, respondedEmails]
-  )
+  const color = PART_COLORS[selGroup] || '#1a5c2a'
 
-  // Filtrar por búsqueda y estado
-  const filtered = useMemo(() => {
-    let list = groupEmps
-    if (filterSt === 'answered') list = list.filter(e => e.answered)
-    if (filterSt === 'pending')  list = list.filter(e => !e.answered)
+  // Stats por grupo
+  const stats = PART_GROUPS.map(g => {
+    const emps = (employees || []).filter(e => e.grupo === g)
+    const resp = emps.filter(e => respondedSet.has((e.email || '').toLowerCase().trim())).length
+    const pct  = emps.length > 0 ? +(resp / emps.length * 100).toFixed(1) : 0
+    return { g, total: emps.length, resp, pct }
+  })
+
+  const selStat = stats.find(s => s.g === selGroup) || { total:0, resp:0, pct:0 }
+
+  // Lista del grupo
+  const groupList = (employees || [])
+    .filter(e => e.grupo === selGroup)
+    .map(e => ({ ...e, answered: respondedSet.has((e.email || '').toLowerCase().trim()) }))
+    .sort((a, b) => {
+      if (a.answered !== b.answered) return a.answered ? 1 : -1
+      return (a.nombre || '').localeCompare(b.nombre || '')
+    })
+
+  const filtered = groupList.filter(e => {
+    if (filter === 'answered' && !e.answered) return false
+    if (filter === 'pending'  &&  e.answered) return false
     if (search.trim()) {
       const q = search.toLowerCase()
-      list = list.filter(e =>
-        e.nombre.toLowerCase().includes(q) ||
-        e.cargo.toLowerCase().includes(q)  ||
-        e.email.toLowerCase().includes(q)  ||
-        e.pais.toLowerCase().includes(q)
-      )
+      return (e.nombre || '').toLowerCase().includes(q) ||
+             (e.cargo  || '').toLowerCase().includes(q) ||
+             (e.email  || '').toLowerCase().includes(q) ||
+             (e.pais   || '').toLowerCase().includes(q)
     }
-    return list
-  }, [groupEmps, filterSt, search])
+    return true
+  })
 
-  // Stats de todos los grupos
-  const allStats = useMemo(() =>
-    GROUP_ORDER.map(g => {
-      const emps = employees.filter(e => e.grupo === g)
-      const resp = emps.filter(e => respondedEmails.has((e.email||'').toLowerCase().trim())).length
-      return { g, total: emps.length, resp, pct: emps.length ? +(resp/emps.length*100).toFixed(1) : 0 }
-    }),
-    [employees, respondedEmails]
-  )
-
-  const selStats = allStats.find(s => s.g === selGroup) || { total:0, resp:0, pct:0 }
-  const color    = GROUP_COLORS_HEX[selGroup] || '#1a5c2a'
+  const pendingCount  = groupList.filter(e => !e.answered).length
+  const answeredCount = groupList.filter(e =>  e.answered).length
 
   return (
     <div>
-      {/* KPIs globales */}
-      <div className="kpi-grid" style={{ marginBottom:20 }}>
-        {allStats.map(({ g, total, resp, pct }) => (
+      {/* Chips de grupo */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(120px, 1fr))', gap:10, marginBottom:20 }}>
+        {stats.map(({ g, total, resp, pct }) => (
           <div key={g}
-            onClick={() => { setSelGroup(g); setSearch(''); setFilterSt('all') }}
+            onClick={() => { setSelGroup(g); setSearch(''); setFilter('all') }}
             style={{
-              background: selGroup === g ? color : '#fff',
-              border: `2px solid ${selGroup === g ? color : '#e5e7eb'}`,
-              borderRadius: 10, padding:'12px 14px', cursor:'pointer',
-              transition:'all .15s',
+              background: selGroup === g ? PART_COLORS[g] : '#fff',
+              border: `2px solid ${selGroup === g ? PART_COLORS[g] : '#e5e7eb'}`,
+              borderRadius:10, padding:'12px 14px', cursor:'pointer', transition:'all .15s',
             }}
           >
-            <div style={{
-              fontSize:'.7rem', fontWeight:700, letterSpacing:'.4px',
-              color: selGroup === g ? 'rgba(255,255,255,.75)' : '#6b7280',
-              marginBottom:4,
-            }}>{g}</div>
-            <div style={{
-              fontFamily:'DM Mono, monospace', fontSize:'1.4rem', fontWeight:800,
-              color: selGroup === g ? '#fff' : color,
-              lineHeight:1,
-            }}>{pct}%</div>
-            <div style={{
-              fontSize:'.7rem', color: selGroup === g ? 'rgba(255,255,255,.65)' : '#9ca3af',
-              marginTop:3,
-            }}>{resp} / {total}</div>
-            <div style={{
-              marginTop:6, height:3,
-              background: selGroup === g ? 'rgba(255,255,255,.25)' : '#f3f4f6',
-              borderRadius:2, overflow:'hidden',
-            }}>
-              <div style={{
-                height:'100%', width:`${pct}%`,
-                background: selGroup === g ? 'rgba(255,255,255,.7)' : color,
-                borderRadius:2, transition:'width .4s',
-              }} />
+            <div style={{ fontSize:'.68rem', fontWeight:700, color: selGroup===g ? 'rgba(255,255,255,.7)' : '#6b7280', marginBottom:3 }}>{g}</div>
+            <div style={{ fontFamily:'DM Mono, monospace', fontSize:'1.3rem', fontWeight:800, color: selGroup===g ? '#fff' : PART_COLORS[g], lineHeight:1 }}>{pct}%</div>
+            <div style={{ fontSize:'.68rem', color: selGroup===g ? 'rgba(255,255,255,.6)' : '#9ca3af', marginTop:2 }}>{resp}/{total}</div>
+            <div style={{ marginTop:6, height:3, background: selGroup===g ? 'rgba(255,255,255,.25)' : '#f3f4f6', borderRadius:2, overflow:'hidden' }}>
+              <div style={{ height:'100%', width:`${pct}%`, background: selGroup===g ? 'rgba(255,255,255,.7)' : PART_COLORS[g], borderRadius:2 }} />
             </div>
           </div>
         ))}
       </div>
 
-      {/* Panel del grupo seleccionado */}
+      {/* Panel detalle */}
       <div className="card">
-        {/* Header del panel */}
-        <div style={{
-          background: color, color:'#fff',
-          padding:'16px 20px', borderRadius:'12px 12px 0 0',
-          display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12,
-        }}>
+        {/* Header */}
+        <div style={{ background: color, color:'#fff', padding:'14px 20px', borderRadius:'12px 12px 0 0', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
           <div>
-            <div style={{ fontSize:'.72rem', fontWeight:600, opacity:.7, letterSpacing:'.4px', textTransform:'uppercase' }}>
-              {selGroup}
-            </div>
-            <div style={{ fontSize:'1rem', fontWeight:700 }}>
-              {GNAMES[selGroup]}
-            </div>
+            <div style={{ fontSize:'.68rem', opacity:.7, textTransform:'uppercase', letterSpacing:'.4px', marginBottom:2 }}>{selGroup}</div>
+            <div style={{ fontSize:'.95rem', fontWeight:700 }}>{PART_NAMES[selGroup]}</div>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:16 }}>
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontFamily:'DM Mono, monospace', fontSize:'1.6rem', fontWeight:800 }}>
-                {selStats.pct}%
-              </div>
-              <div style={{ fontSize:'.7rem', opacity:.7 }}>
-                {selStats.resp} {lang==='en'?'of':'de'} {selStats.total} {lang==='en'?'people':'personas'}
-              </div>
-            </div>
-            {/* Mini barra */}
-            <div style={{ width:100, height:6, background:'rgba(255,255,255,.25)', borderRadius:3, overflow:'hidden' }}>
-              <div style={{ height:'100%', width:`${selStats.pct}%`, background:'rgba(255,255,255,.8)', borderRadius:3 }} />
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            {loading && <div className="spinner" style={{ width:14, height:14, borderWidth:2, borderTopColor:'#fff', borderColor:'rgba(255,255,255,.3)' }} />}
+            <div style={{ textAlign:'right' }}>
+              <div style={{ fontFamily:'DM Mono, monospace', fontSize:'1.5rem', fontWeight:800 }}>{selStat.pct}%</div>
+              <div style={{ fontSize:'.7rem', opacity:.7 }}>{selStat.resp} {lang==='en'?'of':'de'} {selStat.total} {lang==='en'?'people':'personas'}</div>
             </div>
           </div>
         </div>
 
-        {/* Aviso cargando respuestas */}
-        {loading && (
-          <div style={{
-            padding:'8px 20px', background:'#fffbeb',
-            borderBottom:'1px solid #fde68a',
-            fontSize:'.78rem', color:'#92400e', display:'flex', alignItems:'center', gap:8,
-          }}>
-            <div className="spinner" style={{ width:14, height:14, borderWidth:2 }} />
-            {lang === 'en' ? 'Loading responses from Google Sheets…' : 'Cargando respuestas desde Google Sheets…'}
-          </div>
-        )}
         {/* Filtros */}
-        <div style={{
-          padding:'12px 20px', borderBottom:'1px solid #f3f4f6',
-          display:'flex', gap:10, flexWrap:'wrap', alignItems:'center',
-        }}>
+        <div style={{ padding:'10px 16px', borderBottom:'1px solid #f3f4f6', display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' }}>
           <input
             type="text"
-            placeholder={lang==='en' ? 'Search by name, role, email...' : 'Buscar por nombre, cargo, correo...'}
+            placeholder={lang==='en' ? 'Search name, role, email...' : 'Buscar nombre, cargo, correo...'}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{
-              flex:1, minWidth:200, padding:'7px 12px',
-              border:'1.5px solid #e5e7eb', borderRadius:7,
-              fontSize:'.82rem', fontFamily:'inherit', outline:'none',
-            }}
-            onFocus={e => e.target.style.borderColor = color}
-            onBlur={e  => e.target.style.borderColor = '#e5e7eb'}
+            style={{ flex:1, minWidth:180, padding:'6px 11px', border:'1.5px solid #e5e7eb', borderRadius:7, fontSize:'.8rem', fontFamily:'inherit', outline:'none' }}
           />
-          {['all','pending','answered'].map(f => (
-            <button key={f}
-              onClick={() => setFilterSt(f)}
+          {[
+            { id:'all',      label: lang==='en' ? 'All' : 'Todos', count: groupList.length },
+            { id:'pending',  label: lang==='en' ? '⏳ Pending' : '⏳ Pendientes', count: pendingCount },
+            { id:'answered', label: lang==='en' ? '✅ Answered' : '✅ Respondieron', count: answeredCount },
+          ].map(f => (
+            <button key={f.id}
+              onClick={() => setFilter(f.id)}
               style={{
-                padding:'6px 14px', border:'1.5px solid',
-                borderColor: filterSt===f ? color : '#e5e7eb',
-                background: filterSt===f ? color : '#fff',
-                color: filterSt===f ? '#fff' : '#6b7280',
-                borderRadius:7, fontSize:'.78rem', fontWeight:600,
-                cursor:'pointer', fontFamily:'inherit', transition:'all .15s',
+                padding:'5px 12px', border:`1.5px solid ${filter===f.id ? color : '#e5e7eb'}`,
+                background: filter===f.id ? color : '#fff',
+                color: filter===f.id ? '#fff' : '#6b7280',
+                borderRadius:7, fontSize:'.76rem', fontWeight:600,
+                cursor:'pointer', fontFamily:'inherit', whiteSpace:'nowrap',
               }}
             >
-              {f==='all'
-                ? (lang==='en' ? 'All' : 'Todos')
-                : f==='pending'
-                ? `⏳ ${lang==='en' ? 'Pending' : 'Pendientes'} (${groupEmps.filter(e=>!e.answered).length})`
-                : `✅ ${lang==='en' ? 'Answered' : 'Respondieron'} (${groupEmps.filter(e=>e.answered).length})`
-              }
+              {f.label} ({f.count})
             </button>
           ))}
-          <div style={{ marginLeft:'auto', fontSize:'.78rem', color:'#9ca3af' }}>
-            {filtered.length} {lang==='en'?'people':'personas'}
-          </div>
+          <span style={{ marginLeft:'auto', fontSize:'.75rem', color:'#9ca3af' }}>{filtered.length} {lang==='en'?'people':'personas'}</span>
         </div>
 
         {/* Tabla */}
@@ -626,53 +569,47 @@ function ParticipationView({ rows, employees, lang, loading = false }) {
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width:32 }}></th>
+                <th style={{ width:28 }}></th>
                 <th>{lang==='en'?'Name':'Nombre'}</th>
                 <th>{lang==='en'?'Position':'Cargo'}</th>
                 <th>{lang==='en'?'Country':'País'}</th>
                 <th>{lang==='en'?'Email':'Correo'}</th>
-                <th style={{ textAlign:'center' }}>{lang==='en'?'Status':'Estado'}</th>
+                <th style={{ textAlign:'center', width:120 }}>{lang==='en'?'Status':'Estado'}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign:'center', color:'#9ca3af', padding:'32px', fontStyle:'italic' }}>
-                    {lang==='en' ? 'No results found' : 'Sin resultados'}
+                  <td colSpan={6} style={{ textAlign:'center', padding:32, color:'#9ca3af', fontStyle:'italic', fontSize:'.85rem' }}>
+                    {lang==='en' ? 'No results' : 'Sin resultados'}
                   </td>
                 </tr>
-              ) : filtered.map((e, i) => (
-                <tr key={i} style={{ opacity: e.answered ? 1 : 1 }}>
-                  <td style={{ textAlign:'center', fontSize:'1rem' }}>
-                    {e.answered ? '✅' : '⏳'}
-                  </td>
-                  <td style={{ fontWeight:500, fontSize:'.82rem' }}>
-                    {e.nombre.split(' ').slice(0,3).map(w =>
-                      w.charAt(0) + w.slice(1).toLowerCase()
-                    ).join(' ')}
-                  </td>
-                  <td style={{ fontSize:'.78rem', color:'#6b7280', maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                    {e.cargo.charAt(0) + e.cargo.slice(1).toLowerCase()}
-                  </td>
-                  <td style={{ fontSize:'.78rem' }}>{e.pais}</td>
-                  <td style={{ fontFamily:'DM Mono, monospace', fontSize:'.72rem', color:'#6b7280' }}>
-                    {e.email.toLowerCase()}
-                  </td>
-                  <td style={{ textAlign:'center' }}>
-                    <span style={{
-                      display:'inline-flex', alignItems:'center', gap:4,
-                      padding:'3px 10px', borderRadius:20, fontSize:'.72rem', fontWeight:600,
-                      background: e.answered ? '#f0fdf4' : '#fff7ed',
-                      color:       e.answered ? '#16a34a' : '#d97706',
-                      border:      `1px solid ${e.answered ? '#bbf7d0' : '#fed7aa'}`,
-                    }}>
-                      {e.answered
-                        ? (lang==='en' ? '✓ Answered' : '✓ Respondió')
-                        : (lang==='en' ? '⏳ Pending' : '⏳ Pendiente')}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              ) : filtered.map((e, i) => {
+                const nombre = (e.nombre || '').split(' ').slice(0,3)
+                  .map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '')
+                  .join(' ')
+                const cargo = e.cargo ? e.cargo[0].toUpperCase() + e.cargo.slice(1).toLowerCase() : ''
+                return (
+                  <tr key={i}>
+                    <td style={{ textAlign:'center', fontSize:'.9rem' }}>{e.answered ? '✅' : '⏳'}</td>
+                    <td style={{ fontWeight:500, fontSize:'.82rem' }}>{nombre}</td>
+                    <td style={{ fontSize:'.78rem', color:'#6b7280', maxWidth:180, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }} title={cargo}>{cargo}</td>
+                    <td style={{ fontSize:'.78rem' }}>{e.pais}</td>
+                    <td style={{ fontFamily:'DM Mono, monospace', fontSize:'.72rem', color:'#6b7280' }}>{(e.email||'').toLowerCase()}</td>
+                    <td style={{ textAlign:'center' }}>
+                      <span style={{
+                        display:'inline-flex', alignItems:'center', gap:4,
+                        padding:'3px 9px', borderRadius:20, fontSize:'.72rem', fontWeight:600,
+                        background: e.answered ? '#f0fdf4' : '#fff7ed',
+                        color:       e.answered ? '#16a34a' : '#d97706',
+                        border:`1px solid ${e.answered ? '#bbf7d0' : '#fed7aa'}`,
+                      }}>
+                        {e.answered ? (lang==='en'?'✓ Answered':'✓ Respondió') : (lang==='en'?'Pending':'Pendiente')}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -680,6 +617,7 @@ function ParticipationView({ rows, employees, lang, loading = false }) {
     </div>
   )
 }
+
 
 // ── ROOT APP ────────────────────────────────────────────────
 export default function App() {
@@ -772,6 +710,9 @@ export default function App() {
           {lastRefresh && (
             <div>{lang === 'en' ? 'Updated' : 'Actualizado'}: {lastRefresh.toLocaleTimeString()}</div>
           )}
+          <div style={{ marginTop:6, opacity:.6, fontSize:'.68rem' }}>
+            v1.0 · Hortifrut Data Maturity
+          </div>
         </div>
       </aside>
 
