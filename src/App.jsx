@@ -436,20 +436,47 @@ const GROUP_COLORS_HEX = {
 }
 
 // ── Vista: Participación detallada ───────────────────────────
-const PART_GROUPS = ['G1','G2','G3','G4','G5','G6','G7a','G7b','G8b','G8c','G9']
+const PART_GROUPS = ['TODOS','G1','G2','G3','G4','G5','G6','G7a','G7b','G8b','G8c','G9']
 const PART_NAMES  = {
+  TODOS:'Todos los Grupos',
   G1:'Alta Dirección',  G2:'Directores/Gerentes', G3:'Jefes/Subgerentes',
   G4:'Datos & BI',      G5:'TI & Tecnología',     G6:'Creadores Reportes',
   G7a:'Consumidores',   G7b:'Profesionales',       G8b:'Aprobadores MDM',
   G8c:'Operadores MDM', G9:'Data Owners',
 }
 const PART_COLORS = {
+  TODOS:'#1a5c2a',
   G1:'#C00000', G2:'#E26B0A', G3:'#F79646', G4:'#4472C4', G5:'#2E75B6',
   G6:'#70AD47', G7a:'#5B9BD5', G7b:'#4BACC6', G8b:'#9E48C6', G8c:'#B07FD4', G9:'#1F3864',
 }
 
+function downloadExcel(data, filename) {
+  // Generar CSV con BOM para que Excel abra correctamente con tildes
+  const BOM = '\uFEFF'
+  const headers = ['Grupo','Nombre del Grupo','Nombre','Cargo','País','Correo','Estado']
+  const rows = data.map(e => [
+    e.grupo,
+    PART_NAMES[e.grupo] || e.grupo,
+    e.nombre || '',
+    e.cargo  || '',
+    e.pais   || '',
+    (e.email || '').toLowerCase(),
+    e.answered ? 'Respondió' : 'Pendiente',
+  ])
+  const csv = BOM + [headers, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','))
+    .join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href     = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function ParticipationView({ rows, employees, lang, loading }) {
-  const [selGroup, setSelGroup] = useState('G1')
+  const [selGroup, setSelGroup] = useState('TODOS')
   const [search,   setSearch]   = useState('')
   const [filter,   setFilter]   = useState('all')
 
@@ -459,22 +486,36 @@ function ParticipationView({ rows, employees, lang, loading }) {
 
   const color = PART_COLORS[selGroup] || '#1a5c2a'
 
-  // Stats por grupo
-  const stats = PART_GROUPS.map(g => {
+  // Stats por grupo (sin TODOS)
+  const groupStats = ['G1','G2','G3','G4','G5','G6','G7a','G7b','G8b','G8c','G9'].map(g => {
     const emps = (employees || []).filter(e => e.grupo === g)
     const resp = emps.filter(e => respondedSet.has((e.email || '').toLowerCase().trim())).length
     const pct  = emps.length > 0 ? +(resp / emps.length * 100).toFixed(1) : 0
     return { g, total: emps.length, resp, pct }
   })
 
-  const selStat = stats.find(s => s.g === selGroup) || { total:0, resp:0, pct:0 }
+  // Stats para TODOS
+  const totalEmps = (employees || []).length
+  const totalResp = (employees || []).filter(e => respondedSet.has((e.email || '').toLowerCase().trim())).length
+  const totalPct  = totalEmps > 0 ? +(totalResp / totalEmps * 100).toFixed(1) : 0
+  const todosStats = { g:'TODOS', total: totalEmps, resp: totalResp, pct: totalPct }
 
-  // Lista del grupo
-  const groupList = (employees || [])
-    .filter(e => e.grupo === selGroup)
+  const allStats = [todosStats, ...groupStats]
+  const selStat  = allStats.find(s => s.g === selGroup) || { total:0, resp:0, pct:0 }
+
+  // Lista según grupo seleccionado
+  const baseList = selGroup === 'TODOS'
+    ? (employees || [])
+    : (employees || []).filter(e => e.grupo === selGroup)
+
+  const groupList = baseList
     .map(e => ({ ...e, answered: respondedSet.has((e.email || '').toLowerCase().trim()) }))
     .sort((a, b) => {
       if (a.answered !== b.answered) return a.answered ? 1 : -1
+      if (selGroup === 'TODOS') {
+        const ga = a.grupo || '', gb = b.grupo || ''
+        if (ga !== gb) return ga.localeCompare(gb)
+      }
       return (a.nombre || '').localeCompare(b.nombre || '')
     })
 
@@ -486,7 +527,8 @@ function ParticipationView({ rows, employees, lang, loading }) {
       return (e.nombre || '').toLowerCase().includes(q) ||
              (e.cargo  || '').toLowerCase().includes(q) ||
              (e.email  || '').toLowerCase().includes(q) ||
-             (e.pais   || '').toLowerCase().includes(q)
+             (e.pais   || '').toLowerCase().includes(q) ||
+             (e.grupo  || '').toLowerCase().includes(q)
     }
     return true
   })
@@ -494,23 +536,36 @@ function ParticipationView({ rows, employees, lang, loading }) {
   const pendingCount  = groupList.filter(e => !e.answered).length
   const answeredCount = groupList.filter(e =>  e.answered).length
 
+  const handleDownload = () => {
+    const grpLabel = selGroup === 'TODOS' ? 'todos-los-grupos' : selGroup.toLowerCase()
+    const fname = `participacion-${grpLabel}-${new Date().toISOString().slice(0,10)}.csv`
+    downloadExcel(filtered, fname)
+  }
+
   return (
     <div>
       {/* Chips de grupo */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(120px, 1fr))', gap:10, marginBottom:20 }}>
-        {stats.map(({ g, total, resp, pct }) => (
+      <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:20 }}>
+        {allStats.map(({ g, total, resp, pct }) => (
           <div key={g}
             onClick={() => { setSelGroup(g); setSearch(''); setFilter('all') }}
             style={{
               background: selGroup === g ? PART_COLORS[g] : '#fff',
               border: `2px solid ${selGroup === g ? PART_COLORS[g] : '#e5e7eb'}`,
-              borderRadius:10, padding:'12px 14px', cursor:'pointer', transition:'all .15s',
+              borderRadius:10, padding:'10px 14px', cursor:'pointer', transition:'all .15s',
+              minWidth: g === 'TODOS' ? 120 : 90, textAlign:'center',
             }}
           >
-            <div style={{ fontSize:'.68rem', fontWeight:700, color: selGroup===g ? 'rgba(255,255,255,.7)' : '#6b7280', marginBottom:3 }}>{g}</div>
-            <div style={{ fontFamily:'DM Mono, monospace', fontSize:'1.3rem', fontWeight:800, color: selGroup===g ? '#fff' : PART_COLORS[g], lineHeight:1 }}>{pct}%</div>
-            <div style={{ fontSize:'.68rem', color: selGroup===g ? 'rgba(255,255,255,.6)' : '#9ca3af', marginTop:2 }}>{resp}/{total}</div>
-            <div style={{ marginTop:6, height:3, background: selGroup===g ? 'rgba(255,255,255,.25)' : '#f3f4f6', borderRadius:2, overflow:'hidden' }}>
+            <div style={{ fontSize:'.68rem', fontWeight:700, color: selGroup===g ? 'rgba(255,255,255,.75)' : '#6b7280', marginBottom:2 }}>
+              {g === 'TODOS' ? (lang==='en'?'ALL':'TODOS') : g}
+            </div>
+            <div style={{ fontFamily:'DM Mono, monospace', fontSize:'1.2rem', fontWeight:800, color: selGroup===g ? '#fff' : PART_COLORS[g], lineHeight:1 }}>
+              {pct}%
+            </div>
+            <div style={{ fontSize:'.65rem', color: selGroup===g ? 'rgba(255,255,255,.6)' : '#9ca3af', marginTop:2 }}>
+              {resp}/{total}
+            </div>
+            <div style={{ marginTop:5, height:3, background: selGroup===g ? 'rgba(255,255,255,.25)' : '#f3f4f6', borderRadius:2, overflow:'hidden' }}>
               <div style={{ height:'100%', width:`${pct}%`, background: selGroup===g ? 'rgba(255,255,255,.7)' : PART_COLORS[g], borderRadius:2 }} />
             </div>
           </div>
@@ -523,14 +578,30 @@ function ParticipationView({ rows, employees, lang, loading }) {
         <div style={{ background: color, color:'#fff', padding:'14px 20px', borderRadius:'12px 12px 0 0', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
           <div>
             <div style={{ fontSize:'.68rem', opacity:.7, textTransform:'uppercase', letterSpacing:'.4px', marginBottom:2 }}>{selGroup}</div>
-            <div style={{ fontSize:'.95rem', fontWeight:700 }}>{PART_NAMES[selGroup]}</div>
+            <div style={{ fontSize:'.95rem', fontWeight:700 }}>{lang==='en' && selGroup==='TODOS' ? 'All Groups' : PART_NAMES[selGroup]}</div>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:14 }}>
             {loading && <div className="spinner" style={{ width:14, height:14, borderWidth:2, borderTopColor:'#fff', borderColor:'rgba(255,255,255,.3)' }} />}
             <div style={{ textAlign:'right' }}>
               <div style={{ fontFamily:'DM Mono, monospace', fontSize:'1.5rem', fontWeight:800 }}>{selStat.pct}%</div>
               <div style={{ fontSize:'.7rem', opacity:.7 }}>{selStat.resp} {lang==='en'?'of':'de'} {selStat.total} {lang==='en'?'people':'personas'}</div>
             </div>
+            {/* Botón descargar Excel */}
+            <button
+              onClick={handleDownload}
+              title={lang==='en' ? 'Download Excel' : 'Descargar Excel'}
+              style={{
+                background:'rgba(255,255,255,.2)', border:'1px solid rgba(255,255,255,.4)',
+                color:'#fff', borderRadius:7, padding:'7px 14px',
+                fontSize:'.78rem', fontWeight:600, cursor:'pointer',
+                fontFamily:'inherit', display:'flex', alignItems:'center', gap:6,
+                transition:'background .15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,.35)'}
+              onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,.2)'}
+            >
+              📥 {lang==='en' ? 'Download' : 'Descargar'}
+            </button>
           </div>
         </div>
 
@@ -544,7 +615,7 @@ function ParticipationView({ rows, employees, lang, loading }) {
             style={{ flex:1, minWidth:180, padding:'6px 11px', border:'1.5px solid #e5e7eb', borderRadius:7, fontSize:'.8rem', fontFamily:'inherit', outline:'none' }}
           />
           {[
-            { id:'all',      label: lang==='en' ? 'All' : 'Todos', count: groupList.length },
+            { id:'all',      label: lang==='en' ? 'All' : 'Todos',          count: groupList.length },
             { id:'pending',  label: lang==='en' ? '⏳ Pending' : '⏳ Pendientes', count: pendingCount },
             { id:'answered', label: lang==='en' ? '✅ Answered' : '✅ Respondieron', count: answeredCount },
           ].map(f => (
@@ -570,6 +641,7 @@ function ParticipationView({ rows, employees, lang, loading }) {
             <thead>
               <tr>
                 <th style={{ width:28 }}></th>
+                {selGroup === 'TODOS' && <th>{lang==='en'?'Group':'Grupo'}</th>}
                 <th>{lang==='en'?'Name':'Nombre'}</th>
                 <th>{lang==='en'?'Position':'Cargo'}</th>
                 <th>{lang==='en'?'Country':'País'}</th>
@@ -580,18 +652,28 @@ function ParticipationView({ rows, employees, lang, loading }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign:'center', padding:32, color:'#9ca3af', fontStyle:'italic', fontSize:'.85rem' }}>
+                  <td colSpan={selGroup==='TODOS' ? 7 : 6} style={{ textAlign:'center', padding:32, color:'#9ca3af', fontStyle:'italic', fontSize:'.85rem' }}>
                     {lang==='en' ? 'No results' : 'Sin resultados'}
                   </td>
                 </tr>
               ) : filtered.map((e, i) => {
                 const nombre = (e.nombre || '').split(' ').slice(0,3)
-                  .map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '')
-                  .join(' ')
+                  .map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : '').join(' ')
                 const cargo = e.cargo ? e.cargo[0].toUpperCase() + e.cargo.slice(1).toLowerCase() : ''
                 return (
                   <tr key={i}>
                     <td style={{ textAlign:'center', fontSize:'.9rem' }}>{e.answered ? '✅' : '⏳'}</td>
+                    {selGroup === 'TODOS' && (
+                      <td>
+                        <span style={{
+                          display:'inline-block', padding:'2px 8px', borderRadius:12,
+                          fontSize:'.68rem', fontWeight:700,
+                          background: PART_COLORS[e.grupo] + '20',
+                          color: PART_COLORS[e.grupo] || '#6b7280',
+                          border: `1px solid ${PART_COLORS[e.grupo]}40`,
+                        }}>{e.grupo}</span>
+                      </td>
+                    )}
                     <td style={{ fontWeight:500, fontSize:'.82rem' }}>{nombre}</td>
                     <td style={{ fontSize:'.78rem', color:'#6b7280', maxWidth:180, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }} title={cargo}>{cargo}</td>
                     <td style={{ fontSize:'.78rem' }}>{e.pais}</td>
