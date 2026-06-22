@@ -436,18 +436,18 @@ const GROUP_COLORS_HEX = {
 }
 
 function ParticipationView({ rows, employees, lang }) {
-  const [selGroup,  setSelGroup]  = React.useState('G1')
-  const [search,    setSearch]    = React.useState('')
-  const [filterSt,  setFilterSt]  = React.useState('all') // all | answered | pending
+  const [selGroup,  setSelGroup]  = useState('G1')
+  const [search,    setSearch]    = useState('')
+  const [filterSt,  setFilterSt]  = useState('all') // all | answered | pending
 
   // Respondentes — normalizar emails
-  const respondedEmails = React.useMemo(() =>
+  const respondedEmails = useMemo(() =>
     new Set(rows.map(r => (r.email || '').toLowerCase().trim())),
     [rows]
   )
 
   // Empleados del grupo seleccionado
-  const groupEmps = React.useMemo(() =>
+  const groupEmps = useMemo(() =>
     employees
       .filter(e => e.grupo === selGroup)
       .map(e => ({
@@ -463,7 +463,7 @@ function ParticipationView({ rows, employees, lang }) {
   )
 
   // Filtrar por búsqueda y estado
-  const filtered = React.useMemo(() => {
+  const filtered = useMemo(() => {
     let list = groupEmps
     if (filterSt === 'answered') list = list.filter(e => e.answered)
     if (filterSt === 'pending')  list = list.filter(e => !e.answered)
@@ -480,7 +480,7 @@ function ParticipationView({ rows, employees, lang }) {
   }, [groupEmps, filterSt, search])
 
   // Stats de todos los grupos
-  const allStats = React.useMemo(() =>
+  const allStats = useMemo(() =>
     GROUP_ORDER.map(g => {
       const emps = employees.filter(e => e.grupo === g)
       const resp = emps.filter(e => respondedEmails.has((e.email||'').toLowerCase().trim())).length
