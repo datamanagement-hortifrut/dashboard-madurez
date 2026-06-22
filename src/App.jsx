@@ -828,7 +828,7 @@ function CLevelView({ rows, employees, clevels, lang, loading }) {
             <thead>
               <tr>
                 <th>{lang==='en' ? 'C-Level' : 'C-Level'}</th>
-                <th>{lang==='en' ? 'Area' : 'Área'}</th>
+
                 <th style={{ textAlign:'center' }}>{lang==='en' ? 'Responded' : 'Respondieron'}</th>
                 <th style={{ textAlign:'center' }}>{lang==='en' ? 'Pending' : 'Pendientes'}</th>
                 <th style={{ textAlign:'center' }}>{lang==='en' ? 'Total' : 'Total'}</th>
@@ -837,7 +837,7 @@ function CLevelView({ rows, employees, clevels, lang, loading }) {
               </tr>
             </thead>
             <tbody>
-              {stats.filter(s => s.cl !== 'TODOS').map(({ cl, nombre, area, total, resp, pct }) => (
+              {stats.filter(s => s.cl !== 'TODOS').sort((a,b) => b.pct - a.pct).map(({ cl, nombre, area, total, resp, pct }) => (
                 <tr key={cl}
                   onClick={() => { setSelCLevel(cl); setSearch(''); setFilter('all') }}
                   style={{ cursor:'pointer', background: selCLevel===cl ? clevelColors[cl]+'12' : undefined }}
@@ -848,7 +848,7 @@ function CLevelView({ rows, employees, clevels, lang, loading }) {
                       <span style={{ fontWeight:600, fontSize:'.82rem' }}>{nombre}</span>
                     </div>
                   </td>
-                  <td style={{ fontSize:'.78rem', color:'#6b7280' }}>{area}</td>
+
                   <td style={{ textAlign:'center', color:'#16a34a', fontWeight:600, fontFamily:'DM Mono, monospace' }}>{resp}</td>
                   <td style={{ textAlign:'center', color:'#d97706', fontWeight:600, fontFamily:'DM Mono, monospace' }}>{total - resp}</td>
                   <td style={{ textAlign:'center', fontFamily:'DM Mono, monospace', color:'#6b7280' }}>{total}</td>
