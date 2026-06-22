@@ -13,6 +13,7 @@ import RadarChart from './RadarChart.jsx'
 import DimensionDetail from './DimensionDetail.jsx'
 import questionsData from './questions.json'
 import employeesData from './employees.json'
+import clevelsData   from './clevels.json'
 
 // ── Helpers ────────────────────────────────────────────────
 const PILLAR_CLASS = {
@@ -701,6 +702,314 @@ function ParticipationView({ rows, employees, lang, loading }) {
 }
 
 
+
+// ── Vista: Participación por C-Level (v1.3) ──────────────────
+function downloadCSV(data, filename) {
+  const BOM = '\uFEFF'
+  const headers = ['C-Level','Área','Nombre','Cargo','País','Correo','Grupo','Estado']
+  const rows = data.map(e => [
+    e.clevel || 'Sin C-Level',
+    (e.clevel || '').split('/')[1] || '',
+    e.nombre || '',
+    e.cargo  || '',
+    e.pais   || '',
+    (e.email || '').toLowerCase(),
+    e.grupo  || '',
+    e.answered ? 'Respondió' : 'Pendiente',
+  ])
+  const csv = BOM + [headers, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','))
+    .join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
+// Paleta de colores para los C-Levels
+const CLEVEL_PALETTE = [
+  '#C00000','#E26B0A','#4472C4','#70AD47','#7B2D8B',
+  '#2E75B6','#F79646','#1F3864','#5B9BD5','#9E48C6',
+  '#2D7A3A','#D97706','#0EA5E9','#DC2626',
+]
+
+function CLevelView({ rows, employees, clevels, lang, loading }) {
+  const [selCLevel, setSelCLevel] = useState('TODOS')
+  const [search,    setSearch]    = useState('')
+  const [filter,    setFilter]    = useState('all')
+
+  // Normalizar el mapa de C-Levels
+  const clevelMap = clevels || {}
+
+  // Enriquecer empleados con su C-Level
+  const enriched = (employees || []).map(e => ({
+    ...e,
+    clevel: clevelMap[(e.email || '').toLowerCase().trim()] || 'Sin C-Level asignado',
+    answered: new Set((rows||[]).map(r=>(r.email||'').toLowerCase().trim()))
+              .has((e.email||'').toLowerCase().trim()),
+  }))
+
+  const respondedSet = new Set((rows||[]).map(r=>(r.email||'').toLowerCase().trim()))
+
+  // Lista de C-Levels únicos ordenados
+  const clevelList = ['TODOS', ...Array.from(new Set(enriched.map(e => e.clevel))).sort()]
+
+  // Colores asignados
+  const clevelColors = {}
+  clevelList.filter(c => c !== 'TODOS').forEach((c, i) => {
+    clevelColors[c] = CLEVEL_PALETTE[i % CLEVEL_PALETTE.length]
+  })
+  clevelColors['TODOS']               = '#1a5c2a'
+  clevelColors['Sin C-Level asignado'] = '#9ca3af'
+
+  const color = clevelColors[selCLevel] || '#1a5c2a'
+
+  // Stats por C-Level
+  const stats = clevelList.map(cl => {
+    const emps = cl === 'TODOS' ? enriched : enriched.filter(e => e.clevel === cl)
+    const resp = emps.filter(e => e.answered).length
+    const pct  = emps.length > 0 ? +(resp / emps.length * 100).toFixed(1) : 0
+    // Extraer nombre y área del C-Level (formato "NOMBRE/AREA")
+    const parts = cl.split('/')
+    const nombre = parts[0]?.trim() || cl
+    const area   = parts[1]?.trim() || ''
+    return { cl, nombre, area, total: emps.length, resp, pct }
+  })
+
+  const selStat = stats.find(s => s.cl === selCLevel) || { total:0, resp:0, pct:0 }
+
+  // Lista filtrada por C-Level seleccionado
+  const baseList = selCLevel === 'TODOS'
+    ? enriched
+    : enriched.filter(e => e.clevel === selCLevel)
+
+  const sorted = [...baseList].sort((a,b) => {
+    if (a.answered !== b.answered) return a.answered ? 1 : -1
+    if (selCLevel === 'TODOS' && a.clevel !== b.clevel) return a.clevel.localeCompare(b.clevel)
+    return (a.nombre||'').localeCompare(b.nombre||'')
+  })
+
+  const filtered = sorted.filter(e => {
+    if (filter === 'answered' && !e.answered) return false
+    if (filter === 'pending'  &&  e.answered) return false
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      return (e.nombre ||'').toLowerCase().includes(q) ||
+             (e.cargo  ||'').toLowerCase().includes(q) ||
+             (e.email  ||'').toLowerCase().includes(q) ||
+             (e.pais   ||'').toLowerCase().includes(q) ||
+             (e.clevel ||'').toLowerCase().includes(q)
+    }
+    return true
+  })
+
+  const pendingCount  = baseList.filter(e => !e.answered).length
+  const answeredCount = baseList.filter(e =>  e.answered).length
+
+  const handleDownload = () => {
+    const label = selCLevel === 'TODOS' ? 'todos' : selCLevel.split('/')[0].replace(/\s+/g,'-').toLowerCase()
+    downloadCSV(filtered, `participacion-clevel-${label}-${new Date().toISOString().slice(0,10)}.csv`)
+  }
+
+  // Nombre corto para los chips
+  const shortName = cl => {
+    if (cl === 'TODOS') return lang === 'en' ? 'ALL' : 'TODOS'
+    return cl.split('/')[0]?.split(' ').slice(0,2).join(' ') || cl
+  }
+
+  return (
+    <div>
+      {/* Resumen — tabla de todos los C-Levels */}
+      <div className="card card-pad" style={{ marginBottom:20 }}>
+        <div className="section-title">{lang==='en' ? 'Summary by C-Level' : 'Resumen por C-Level'}</div>
+        <div style={{ overflowX:'auto' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>{lang==='en' ? 'C-Level' : 'C-Level'}</th>
+                <th>{lang==='en' ? 'Area' : 'Área'}</th>
+                <th style={{ textAlign:'center' }}>{lang==='en' ? 'Responded' : 'Respondieron'}</th>
+                <th style={{ textAlign:'center' }}>{lang==='en' ? 'Pending' : 'Pendientes'}</th>
+                <th style={{ textAlign:'center' }}>{lang==='en' ? 'Total' : 'Total'}</th>
+                <th style={{ width:180 }}>{lang==='en' ? 'Progress' : 'Progreso'}</th>
+                <th style={{ textAlign:'center' }}>%</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.filter(s => s.cl !== 'TODOS').map(({ cl, nombre, area, total, resp, pct }) => (
+                <tr key={cl}
+                  onClick={() => { setSelCLevel(cl); setSearch(''); setFilter('all') }}
+                  style={{ cursor:'pointer', background: selCLevel===cl ? clevelColors[cl]+'12' : undefined }}
+                >
+                  <td>
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <div style={{ width:10, height:10, borderRadius:'50%', background: clevelColors[cl], flexShrink:0 }} />
+                      <span style={{ fontWeight:600, fontSize:'.82rem' }}>{nombre}</span>
+                    </div>
+                  </td>
+                  <td style={{ fontSize:'.78rem', color:'#6b7280' }}>{area}</td>
+                  <td style={{ textAlign:'center', color:'#16a34a', fontWeight:600, fontFamily:'DM Mono, monospace' }}>{resp}</td>
+                  <td style={{ textAlign:'center', color:'#d97706', fontWeight:600, fontFamily:'DM Mono, monospace' }}>{total - resp}</td>
+                  <td style={{ textAlign:'center', fontFamily:'DM Mono, monospace', color:'#6b7280' }}>{total}</td>
+                  <td>
+                    <div style={{ height:6, background:'#f3f4f6', borderRadius:3, overflow:'hidden' }}>
+                      <div style={{ height:'100%', width:`${pct}%`, background: clevelColors[cl], borderRadius:3, transition:'width .4s' }} />
+                    </div>
+                  </td>
+                  <td style={{ textAlign:'center', fontFamily:'DM Mono, monospace', fontWeight:700, color: clevelColors[cl] }}>{pct}%</td>
+                </tr>
+              ))}
+              {/* Fila total */}
+              {(() => { const t = stats.find(s=>s.cl==='TODOS'); return t ? (
+                <tr style={{ background:'#f8fbf9', fontWeight:700, borderTop:'2px solid #e5e7eb' }}>
+                  <td colSpan={2} style={{ fontWeight:700 }}>TOTAL</td>
+                  <td style={{ textAlign:'center', color:'#16a34a', fontFamily:'DM Mono, monospace', fontWeight:700 }}>{t.resp}</td>
+                  <td style={{ textAlign:'center', color:'#d97706', fontFamily:'DM Mono, monospace', fontWeight:700 }}>{t.total - t.resp}</td>
+                  <td style={{ textAlign:'center', fontFamily:'DM Mono, monospace', fontWeight:700 }}>{t.total}</td>
+                  <td>
+                    <div style={{ height:6, background:'#f3f4f6', borderRadius:3, overflow:'hidden' }}>
+                      <div style={{ height:'100%', width:`${t.pct}%`, background:'#1a5c2a', borderRadius:3 }} />
+                    </div>
+                  </td>
+                  <td style={{ textAlign:'center', fontFamily:'DM Mono, monospace', fontWeight:800, color:'#1a5c2a' }}>{t.pct}%</td>
+                </tr>
+              ) : null })()}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Detalle del C-Level seleccionado */}
+      <div className="card">
+        {/* Header */}
+        <div style={{ background: color, color:'#fff', padding:'14px 20px', borderRadius:'12px 12px 0 0', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
+          <div>
+            <div style={{ fontSize:'.68rem', opacity:.7, textTransform:'uppercase', letterSpacing:'.4px', marginBottom:2 }}>
+              {lang==='en' ? 'Detail' : 'Detalle'}
+            </div>
+            <div style={{ fontSize:'.95rem', fontWeight:700 }}>
+              {selCLevel === 'TODOS' ? (lang==='en' ? 'All C-Levels' : 'Todos los C-Levels') : selCLevel.split('/')[0]}
+              {selCLevel !== 'TODOS' && selCLevel.includes('/') && (
+                <span style={{ fontSize:'.75rem', opacity:.7, marginLeft:8 }}>/ {selCLevel.split('/')[1]}</span>
+              )}
+            </div>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+            {loading && <div className="spinner" style={{ width:14, height:14, borderWidth:2, borderTopColor:'#fff', borderColor:'rgba(255,255,255,.3)' }} />}
+            <div style={{ textAlign:'right' }}>
+              <div style={{ fontFamily:'DM Mono, monospace', fontSize:'1.5rem', fontWeight:800 }}>{selStat.pct}%</div>
+              <div style={{ fontSize:'.7rem', opacity:.7 }}>{selStat.resp} {lang==='en'?'of':'de'} {selStat.total} {lang==='en'?'people':'personas'}</div>
+            </div>
+            {/* Botón seleccionar todos */}
+            <button onClick={() => { setSelCLevel('TODOS'); setSearch(''); setFilter('all') }}
+              style={{ background:'rgba(255,255,255,.15)', border:'1px solid rgba(255,255,255,.35)', color:'#fff', borderRadius:7, padding:'6px 12px', fontSize:'.75rem', fontWeight:600, cursor:'pointer', fontFamily:'inherit' }}>
+              {lang==='en' ? 'All' : 'Todos'}
+            </button>
+            {/* Botón descargar */}
+            <button onClick={handleDownload}
+              style={{ background:'rgba(255,255,255,.2)', border:'1px solid rgba(255,255,255,.4)', color:'#fff', borderRadius:7, padding:'7px 14px', fontSize:'.78rem', fontWeight:600, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:6 }}
+              onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,.35)'}
+              onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,.2)'}
+            >
+              📥 {lang==='en' ? 'Download' : 'Descargar'}
+            </button>
+          </div>
+        </div>
+
+        {/* Chips C-Level para filtrar */}
+        <div style={{ padding:'10px 16px', borderBottom:'1px solid #f3f4f6', display:'flex', gap:6, flexWrap:'wrap' }}>
+          {clevelList.map(cl => (
+            <button key={cl}
+              onClick={() => { setSelCLevel(cl); setSearch(''); setFilter('all') }}
+              style={{
+                padding:'4px 10px', border:`1.5px solid ${selCLevel===cl ? clevelColors[cl] : '#e5e7eb'}`,
+                background: selCLevel===cl ? clevelColors[cl] : '#fff',
+                color: selCLevel===cl ? '#fff' : '#6b7280',
+                borderRadius:20, fontSize:'.72rem', fontWeight:600,
+                cursor:'pointer', fontFamily:'inherit', whiteSpace:'nowrap',
+              }}
+            >{shortName(cl)}</button>
+          ))}
+        </div>
+
+        {/* Filtros */}
+        <div style={{ padding:'8px 16px', borderBottom:'1px solid #f3f4f6', display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' }}>
+          <input type="text"
+            placeholder={lang==='en' ? 'Search name, role, email...' : 'Buscar nombre, cargo, correo...'}
+            value={search} onChange={e => setSearch(e.target.value)}
+            style={{ flex:1, minWidth:180, padding:'6px 11px', border:'1.5px solid #e5e7eb', borderRadius:7, fontSize:'.8rem', fontFamily:'inherit', outline:'none' }}
+          />
+          {[
+            { id:'all',      label: lang==='en'?'All':'Todos',                count: baseList.length },
+            { id:'pending',  label: lang==='en'?'⏳ Pending':'⏳ Pendientes', count: pendingCount },
+            { id:'answered', label: lang==='en'?'✅ Answered':'✅ Respondieron', count: answeredCount },
+          ].map(f => (
+            <button key={f.id} onClick={() => setFilter(f.id)}
+              style={{ padding:'5px 12px', border:`1.5px solid ${filter===f.id ? color : '#e5e7eb'}`, background: filter===f.id ? color : '#fff', color: filter===f.id ? '#fff' : '#6b7280', borderRadius:7, fontSize:'.76rem', fontWeight:600, cursor:'pointer', fontFamily:'inherit', whiteSpace:'nowrap' }}>
+              {f.label} ({f.count})
+            </button>
+          ))}
+          <span style={{ marginLeft:'auto', fontSize:'.75rem', color:'#9ca3af' }}>{filtered.length} {lang==='en'?'people':'personas'}</span>
+        </div>
+
+        {/* Tabla detalle */}
+        <div style={{ overflowX:'auto' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th style={{ width:28 }}></th>
+                {selCLevel === 'TODOS' && <th>{lang==='en'?'C-Level':'C-Level'}</th>}
+                <th>{lang==='en'?'Name':'Nombre'}</th>
+                <th>{lang==='en'?'Position':'Cargo'}</th>
+                <th>{lang==='en'?'Country':'País'}</th>
+                <th>{lang==='en'?'Group':'Grupo'}</th>
+                <th>{lang==='en'?'Email':'Correo'}</th>
+                <th style={{ textAlign:'center', width:120 }}>{lang==='en'?'Status':'Estado'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={selCLevel==='TODOS' ? 8 : 7} style={{ textAlign:'center', padding:32, color:'#9ca3af', fontStyle:'italic', fontSize:'.85rem' }}>
+                    {lang==='en' ? 'No results' : 'Sin resultados'}
+                  </td>
+                </tr>
+              ) : filtered.map((e, i) => {
+                const nombre = (e.nombre||'').split(' ').slice(0,3).map(w => w ? w[0].toUpperCase()+w.slice(1).toLowerCase() : '').join(' ')
+                const cargo  = e.cargo ? e.cargo[0].toUpperCase()+e.cargo.slice(1).toLowerCase() : ''
+                const clvColor = clevelColors[e.clevel] || '#9ca3af'
+                return (
+                  <tr key={i}>
+                    <td style={{ textAlign:'center', fontSize:'.9rem' }}>{e.answered ? '✅' : '⏳'}</td>
+                    {selCLevel === 'TODOS' && (
+                      <td>
+                        <span style={{ display:'inline-block', padding:'2px 8px', borderRadius:12, fontSize:'.68rem', fontWeight:700, background: clvColor+'18', color: clvColor, border:`1px solid ${clvColor}35`, whiteSpace:'nowrap' }}>
+                          {e.clevel.split('/')[0]?.split(' ').slice(0,2).join(' ')}
+                        </span>
+                      </td>
+                    )}
+                    <td style={{ fontWeight:500, fontSize:'.82rem' }}>{nombre}</td>
+                    <td style={{ fontSize:'.78rem', color:'#6b7280', maxWidth:160, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }} title={cargo}>{cargo}</td>
+                    <td style={{ fontSize:'.78rem' }}>{e.pais}</td>
+                    <td><span style={{ fontFamily:'DM Mono, monospace', fontSize:'.7rem', background:'#f3f4f6', padding:'2px 7px', borderRadius:4 }}>{e.grupo}</span></td>
+                    <td style={{ fontFamily:'DM Mono, monospace', fontSize:'.72rem', color:'#6b7280' }}>{(e.email||'').toLowerCase()}</td>
+                    <td style={{ textAlign:'center' }}>
+                      <span style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'3px 9px', borderRadius:20, fontSize:'.72rem', fontWeight:600, background: e.answered?'#f0fdf4':'#fff7ed', color: e.answered?'#16a34a':'#d97706', border:`1px solid ${e.answered?'#bbf7d0':'#fed7aa'}` }}>
+                        {e.answered ? (lang==='en'?'✓ Answered':'✓ Respondió') : (lang==='en'?'Pending':'Pendiente')}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── ROOT APP ────────────────────────────────────────────────
 export default function App() {
   const [view,    setView]    = useState('overview')
@@ -742,6 +1051,7 @@ export default function App() {
     { id: 'byCountry',     icon: '🌍', label: lang === 'en' ? 'By Country'     : 'Por País'          },
     { id: 'byGroup',       icon: '👥', label: lang === 'en' ? 'By Group'       : 'Por Grupo'         },
     { id: 'participation', icon: '✅', label: lang === 'en' ? 'Participation'  : 'Participación'     },
+    { id: 'byclevel',      icon: '🏢', label: lang === 'en' ? 'By C-Level'     : 'Por C-Level'       },
   ]
 
   const pageTitle = {
@@ -751,6 +1061,7 @@ export default function App() {
     byCountry:  lang === 'en' ? 'Analysis by Country' : 'Análisis por País',
     byGroup:       lang === 'en' ? 'Analysis by Group'   : 'Análisis por Grupo',
     participation: lang === 'en' ? 'Participation Detail' : 'Detalle de Participación',
+    byclevel:      lang === 'en' ? 'Participation by C-Level' : 'Participación por C-Level',
   }
 
   return (
@@ -856,6 +1167,7 @@ export default function App() {
         )}
         {/* Participación no necesita esperar al Sheet — muestra empleados siempre */}
         {view === 'participation' && <ParticipationView rows={rows} employees={employees} lang={lang} loading={loading} />}
+        {view === 'byclevel'      && <CLevelView rows={rows} employees={employees} clevels={clevelsData} lang={lang} loading={loading} />}
       </main>
     </div>
   )
