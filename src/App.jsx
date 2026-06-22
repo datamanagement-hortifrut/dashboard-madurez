@@ -435,7 +435,7 @@ const GROUP_COLORS_HEX = {
   G8b:'#9E48C6', G8c:'#B07FD4', G9:'#1F3864',
 }
 
-function ParticipationView({ rows, employees, lang }) {
+function ParticipationView({ rows, employees, lang, loading = false }) {
   const [selGroup,  setSelGroup]  = useState('G1')
   const [search,    setSearch]    = useState('')
   const [filterSt,  setFilterSt]  = useState('all') // all | answered | pending
@@ -567,6 +567,17 @@ function ParticipationView({ rows, employees, lang }) {
           </div>
         </div>
 
+        {/* Aviso cargando respuestas */}
+        {loading && (
+          <div style={{
+            padding:'8px 20px', background:'#fffbeb',
+            borderBottom:'1px solid #fde68a',
+            fontSize:'.78rem', color:'#92400e', display:'flex', alignItems:'center', gap:8,
+          }}>
+            <div className="spinner" style={{ width:14, height:14, borderWidth:2 }} />
+            {lang === 'en' ? 'Loading responses from Google Sheets…' : 'Cargando respuestas desde Google Sheets…'}
+          </div>
+        )}
         {/* Filtros */}
         <div style={{
           padding:'12px 20px', borderBottom:'1px solid #f3f4f6',
@@ -818,9 +829,10 @@ export default function App() {
             {view === 'dimensions' && <DimensionsView scores={scores} lang={lang} />}
             {view === 'byCountry'  && <FilteredView rows={rows} questions={questions} employees={employees} lang={lang} />}
             {view === 'byGroup'    && <GroupsView rows={rows} questions={questions} employees={employees} lang={lang} />}
-            {view === 'participation' && <ParticipationView rows={rows} employees={employees} lang={lang} />}
           </>
         )}
+        {/* Participación no necesita esperar al Sheet — muestra empleados siempre */}
+        {view === 'participation' && <ParticipationView rows={rows} employees={employees} lang={lang} loading={loading} />}
       </main>
     </div>
   )
